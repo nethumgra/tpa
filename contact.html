@@ -15,8 +15,32 @@
         .tab-button.active { border-color: #eab308; color: #eab308; }
         @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
         .pop { animation: pop 0.2s ease-out; }
-        .header-top-bar { background-color: #eab308; }
+
+        /* Header/Nav Styles */
+        .header-top-bar { background-color: #eab308; font-size: 0.7rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+        .header-top-bar a { transition: color 0.2s ease; }
+        .header-top-bar a:hover { color: #f3f4f6; }
         .main-nav { background-color: #f3f4f6; border-bottom: 1px solid #e5e7eb; }
+
+        /* Drawer Styles */
+         .drawer { transform: translateX(100%); transition: transform 0.3s ease-in-out; z-index: 60; }
+         .drawer-modal:not(.hidden) .drawer-bg { opacity: 1; z-index: 55; }
+         .drawer-modal:not(.hidden) .drawer { transform: translateX(0); }
+         .drawer.drawer-left { transform: translateX(-100%); }
+         .drawer-modal:not(.hidden) .drawer.drawer-left { transform: translateX(0); }
+         #cart-drawer { width: 60%; max-width: 448px; } /* Cart drawer width */
+         #cart-modal-bg { opacity: 0; transition: opacity 0.3s ease-in-out; }
+         #cart-modal:not(.hidden) #cart-modal-bg { opacity: 1; }
+         .category-drawer a { display: block; padding: 12px 20px; text-transform: uppercase; font-size: 0.875rem; border-bottom: 1px solid #f3f4f6; color: #374151; transition: all 0.2s ease; font-weight: 500; }
+         .category-drawer a:hover { background-color: #f9fafb; color: #d97706; }
+         .category-drawer a.active-link { color: #eab308; font-weight: 700; }
+         .category-drawer h3 { background-color: #eab308; color: white; padding: 12px 16px; }
+         .drawer-tab.active { color: #eab308; border-bottom: 2px solid #eab308; font-weight: 600; }
+         .drawer-menu-link { display: block; padding: 12px 20px; text-transform: uppercase; font-size: 0.875rem; border-bottom: 1px solid #f3f4f6; color: #374151; transition: all 0.2s ease; }
+         .drawer-menu-link:hover { background-color: #f9fafb; color: #d97706; }
+         .drawer-menu-link.active-link { color: #eab308; font-weight: 700; }
+
+        /* Footer Styles */
         .site-footer { background-color: #f8f8f8; color: #555; font-size: 0.875rem; }
         .site-footer h4 { font-weight: 600; color: #333; margin-bottom: 1rem; text-transform: uppercase; }
         .site-footer a { color: #555; transition: color 0.2s ease; }
@@ -28,322 +52,509 @@
         .footer-bottom .fa-cc-mastercard { color: #EB001B; }
         .footer-bottom .fa-cc-discover { color: #FF6600; }
 
+        /* Fixed Chat Button Styles */
+        .fixed-chat-button { position: fixed; bottom: 30px; right: 30px; z-index: 1000; background-color: #eab308; color: white; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.2s ease; }
+        .fixed-chat-button i { font-size: 28px; } /* Default Icon Size */
+        .fixed-chat-button:hover { transform: scale(1.1); }
+        @media (max-width: 767px) { .fixed-chat-button { bottom: 84px; right: auto; left: 20px; width: 50px; height: 50px; z-index: 50; } .fixed-chat-button i { font-size: 24px; } } /* Mobile Position & Size */
+
         /* Accordion Styles (Yellow Theme) */
-        .faq-question {
-            cursor: pointer; padding: 1rem 0; border-bottom: 1px solid #e5e7eb;
-            display: flex; justify-content: space-between; align-items: center;
-            font-weight: 500; color: #374151; transition: color 0.2s ease;
-        }
+        .faq-question { cursor: pointer; padding: 1rem 0; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; font-weight: 500; color: #374151; transition: color 0.2s ease; }
         .faq-question:hover { color: #d97706; }
-        .faq-question.active { color: #d97706; /* <<< YELLOW THEME */ }
-        .faq-answer {
-            max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out;
-            padding-right: 1rem; font-size: 0.875rem; color: #6b7280; line-height: 1.6;
-        }
+        .faq-question.active { color: #d97706; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, padding 0.3s ease-out; padding-right: 1rem; font-size: 0.875rem; color: #6b7280; line-height: 1.6; }
         .faq-answer p { padding-top: 0.5rem; padding-bottom: 1rem; }
         .faq-question i { transition: transform 0.3s ease; color: #9ca3af; }
-        .faq-question.active i { transform: rotate(180deg); color: #d97706; /* <<< YELLOW THEME */ }
+        .faq-question.active i { transform: rotate(180deg); color: #d97706; }
     </style>
 </head>
-<body class="bg-white">
-
-    <div id="auth-modal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center hidden"> <div class="bg-white rounded-lg shadow-xl w-full max-w-md m-4"> <div class="p-4 border-b"> <div class="flex justify-between items-center"> <h2 class="text-xl font-bold text-slate-700">Welcome!</h2> <button id="close-modal-btn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button> </div> </div> <div class="p-2 bg-slate-100 flex gap-2"> <button id="login-tab-btn" class="tab-button active flex-1 bg-white p-2 rounded-md font-semibold border-b-2">Login</button> <button id="signup-tab-btn" class="tab-button flex-1 bg-white p-2 rounded-md font-semibold text-slate-500 border-b-2 border-transparent">Sign Up</button> </div> <div class="p-6" style="max-height: 70vh; overflow-y: auto;"> <form id="login-form" class="space-y-4"> <input type="email" id="login-email" placeholder="Email" required class="w-full p-3 border rounded-md"> <input type="password" id="login-password" placeholder="Password" required class="w-full p-3 border rounded-md"> <button type="submit" class="w-full bg-amber-600 text-white p-3 rounded-md hover:bg-amber-700">Login</button> <p id="login-error" class="text-red-500 text-sm text-center"></p> </form> <form id="signup-form" class="space-y-4 hidden"> <input type="text" id="signup-name" placeholder="Full Name" required class="w-full p-3 border rounded-md"> <input type="email" id="signup-email" placeholder="Email" required class="w-full p-3 border rounded-md"> <input type="password" id="signup-password" placeholder="Password" required class="w-full p-3 border rounded-md"> <input type="tel" id="signup-phone" placeholder="Phone Number" required class="w-full p-3 border rounded-md"> <input type="text" id="signup-address" placeholder="Address" required class="w-full p-3 border rounded-md"> <div class="grid grid-cols-2 gap-4"> <input type="text" id="signup-city" placeholder="City" required class="w-full p-3 border rounded-md"> <input type="text" id="signup-district" placeholder="District" required class="w-full p-3 border rounded-md"> </div> <input type="text" id="signup-postal-code" placeholder="Postal Code" required class="w-full p-3 border rounded-md"> <button type="submit" class="w-full bg-amber-600 text-white p-3 rounded-md hover:bg-amber-700">Create Account</button> <p id="signup-error" class="text-red-500 text-sm text-center"></p> </form> </div> </div> </div>
-    
-    <div id="tracking-modal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center hidden"> <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl m-4" style="max-height: 90vh;"> <div class="p-6 flex justify-between items-center border-b"> <h2 class="text-3xl font-bold text-slate-800">My Orders</h2> <button id="close-tracking-btn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button> </div> <div id="tracking-items-container" class="p-6 flex flex-col" style="max-height: calc(90vh - 100px); overflow-y: auto;"> <p class="text-slate-500 text-center">Loading your orders...</p> </div> </div> </div>
-
-     <header class="sticky top-0 z-40 bg-white shadow-md">
-          <div class="header-top-bar text-white text-xs py-1"> <div class="container mx-auto px-4 flex justify-between items-center"> <span>Your Ultimate Destination</span> <div class="flex items-center space-x-4"> <a href="#" class="hover:text-gray-300"><i class="fab fa-facebook-f"></i></a> <a href="#" class="hover:text-gray-300"><i class="fab fa-instagram"></i></a> <a href="#" class="hover:text-gray-300"><i class="fab fa-whatsapp"></i></a> <span class="border-l border-amber-400 h-4"></span> <a href="#" class="hover:underline">NEWSLETTER</a> <a href="contact.html" class="hover:underline">CONTACT US</a> <a href="#" class="hover:underline">FAQS</a> </div> </div> </div> <div class="py-4 border-b"> <div class="container mx-auto px-4 flex justify-between items-center gap-6"> <a href="index.html" id="logo-btn" class="flex-shrink-0">
-                   <img src="LOGO.png" alt="TPA - The Phone Arcade" class="h-10 md:h-12">
-                   </a> <div class="flex-grow flex border border-gray-300 rounded-md overflow-hidden"> <input type="text" id="search-bar" placeholder="Search for products" class="w-full px-4 py-2 focus:outline-none text-sm">
-                   <select id="search-category-dropdown" class="border-l border-gray-300 px-2 text-sm text-gray-600 focus:outline-none bg-gray-50 hidden md:block">
-                        <option value="all">ALL CATEGORIES</option>
-                   </select>
-                   <button id="search-icon-btn" class="bg-gray-100 px-4 text-gray-600 hover:bg-gray-200"> <i class="fas fa-search"></i> </button> </div> <div class="flex items-center space-x-3 md:space-x-4 text-gray-700"> <div id="auth-links" class="text-sm hidden md:block"> <button id="login-btn-nav" class="hover:text-amber-700">LOGIN</button> / <button id="signup-btn-nav" class="hover:text-amber-700">REGISTER</button> </div>
-                    <div id="user-info" class="hidden items-center space-x-3 text-sm">
-                        <a href="profile.html" class="flex items-center gap-2 hover:text-amber-700 p-1 rounded-md">
-                            <i class="fas fa-user-circle text-2xl text-gray-500"></i>
-                            <span id="user-email" class="hidden lg:inline font-medium text-gray-700"></span>
-                        </a>
-                        <span class="border-l h-5 self-center"></span>
-                        <button id="logout-btn-nav" class="hover:text-red-600 text-gray-600 text-xs font-medium uppercase tracking-wider hover:bg-gray-100 p-2 rounded-md">Logout</button>
-                    </div>
-                    <span class="border-l h-5 self-center hidden md:block"></span> 
-                    <a href="wishlist.html" title="Wishlist" class="relative hover:text-amber-700"> 
-                        <i class="fas fa-heart text-xl"></i> 
-                        <span id="wishlist-count-badge" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> 
-                    </a> 
-                    <a href="#" title="Compare" class="relative hover:text-amber-700 hidden md:block"> <i class="fas fa-exchange-alt text-xl"></i> <span class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> </a> 
-                    <a href="cart.html" id="cart-icon" title="Cart" class="relative hover:text-amber-700 flex items-center"> <i class="fas fa-shopping-bag text-xl"></i> <span id="cart-count-badge" class="absolute -top-1 -right-2 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> <span class="ml-2 text-sm font-semibold hidden md:inline">Rs.0.00</span> </a> 
-                    <button id="tracking-icon-btn" title="Track My Orders" class="relative hover:text-amber-700"> <i class="fas fa-clipboard-list text-xl"></i> </button> 
-                </div> </div> </div> 
-                <nav class="main-nav hidden md:block"> <div class="container mx-auto px-4 flex justify-between items-center h-12"> <div class="flex space-x-6 text-sm font-medium"> 
-                    <a href="index.html" class="text-gray-700 hover:text-amber-700">HOME</a> 
-                    <a href="shop.html" class="text-gray-700 hover:text-amber-700">SHOP</a> 
-                    <a href="about.html" class="text-gray-700 hover:text-amber-700">ABOUT US</a> 
-                    <a href="contact.html" class="text-amber-600 hover:text-gray-900 font-semibold">CONTACT US</a>
-                    <a href="#" class="text-gray-700 hover:text-amber-700">STORE</a> </div> <a href="#" class="text-amber-600 font-semibold text-sm flex items-center gap-1 hover:text-gray-900"> <i class="fas fa-heart text-xs"></i> SPECIAL OFFERS </a> </div> </nav>
-     </header>
-
-     <main class="container mx-auto px-4 py-12 md:px-8 md:py-16">
-        <div class="text-center mb-12 border-b pb-6">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Contact Us</h1>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
-            
-            <div>
-                <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Information Questions</p>
-                <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-6">FREQUENTLY ASKED QUESTIONS</h2>
-                <div id="faq-accordion" class="border-t border-gray-200">
-                    
-                    <div class="faq-item">
-                        <button class="faq-question active">
-                            <span>Can I get my phone repaired at your store?</span>
-                            <i class="fas fa-chevron-down"></i>
-                        </button>
-                        <div class="faq-answer" style="max-height: fit-content;"> 
-                            <p>Absolutely! We have a team of skilled technicians who can diagnose and repair various phone issues. Whether it's a broken screen, battery replacement, or software problem, we can help. Bring your phone to our store, and we'll provide you with a repair assessment and an estimated cost.</p>
-                        </div>
-                    </div>
-                    <div class="faq-item">
-                        <button class="faq-question"><span>Do you sell phone accessories?</span><i class="fas fa-chevron-down"></i></button>
-                        <div class="faq-answer"><p>Yes, we offer a wide range of phone accessories including cases, screen protectors, chargers, cables, headphones, and more. Visit our store or browse our online shop to see our selection.</p></div>
-                    </div>
-                    <div class="faq-item">
-                        <button class="faq-question"><span>What payment methods do you accept?</span><i class="fas fa-chevron-down"></i></button>
-                        <div class="faq-answer"><p>We accept various payment methods, including cash, major credit cards (Visa, MasterCard, AMEX), debit cards, and popular mobile payment options like Koko and MintPay. Online purchases can be made securely via card or bank transfer.</p></div>
-                    </div>
-                    <div class="faq-item">
-                        <button class="faq-question"><span>Can I buy products from your store online?</span><i class="fas fa-chevron-down"></i></button>
-                        <div class="faq-answer"><p>Yes, most of our products are available for purchase through our website. We offer islandwide delivery options for your convenience. Check our <a href="shop.html" class="text-amber-600 hover:underline">Shop</a> page.</p></div>
-                    </div>
-                     <div class="faq-item">
-                        <button class="faq-question"><span>What brands of mobile phones do you sell?</span><i class="fas fa-chevron-down"></i></button>
-                        <div class="faq-answer"><p>We carry a variety of popular mobile phone brands including Apple (iPhone), Samsung, Google Pixel, Huawei, Xiaomi, and more. Our inventory is regularly updated with the latest models.</p></div>
-                    </div>
+<body class="bg-white pb-16 md:pb-0"> <div id="account-drawer-modal" class="drawer-modal fixed inset-0 z-50 hidden">
+        <div id="account-drawer-bg" class="drawer-bg fixed inset-0 modal-bg opacity-0 transition-opacity"></div>
+        <div id="account-drawer" class="drawer fixed top-0 right-0 h-full bg-white shadow-xl w-full max-w-md flex flex-col">
+            <div id="account-drawer-logged-in" class="hidden flex flex-col h-full">
+                <div class="p-4 flex justify-between items-center border-b flex-shrink-0">
+                     <h2 class="text-xl font-semibold text-slate-800">My Account</h2>
+                     <button id="close-account-drawer-btn-logged-in" class="text-slate-500 hover:text-slate-800 text-sm flex items-center gap-1"><i class="fas fa-times"></i> Close</button>
+                </div>
+                <div class="flex-grow p-6 overflow-y-auto">
+                     <p class="text-slate-600 mb-2">Welcome back,</p>
+                     <h3 id="account-drawer-user-email" class="text-lg font-semibold text-slate-800 mb-6 break-words"></h3>
+                     <a href="profile.html" class="w-full text-center bg-amber-600 text-white p-3 rounded-lg hover:bg-amber-700 font-bold text-base">Edit Profile</a>
+                     <button id="drawer-logout-btn" class="w-full text-center bg-gray-100 text-gray-700 p-3 rounded-lg hover:bg-gray-200 font-bold text-base mt-4">Logout</button>
                 </div>
             </div>
-
-            <div>
-                <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Information About Us</p>
-                <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-6">CONTACT US FOR ANY QUESTIONS</h2>
-                
-                <form id="contact-form" class="space-y-5">
-                    <div><input type="text" id="contact-name" name="name" required placeholder="Your name" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"></div>
-                    <div><input type="email" id="contact-email" name="email" required placeholder="Your email" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"></div>
-                    <div><input type="text" id="contact-subject" name="subject" required placeholder="Subject" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"></div>
-                    <div><textarea id="contact-message" name="message" rows="6" placeholder="Your message (optional)" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"></textarea></div>
-                    <div>
-                        <button type="button" id="submit-contact-form" class="w-auto bg-amber-600 text-white px-8 py-3 rounded-md hover:bg-amber-700 font-semibold text-sm tracking-wide transition duration-200">
-                            SUBMIT
-                        </button>
-                    </div>
-                </form>
+            <div id="account-drawer-logged-out" class="hidden flex flex-col h-full">
+                <div class="p-4 border-b">
+                     <div class="flex justify-between items-center">
+                         <h2 class="text-xl font-bold text-slate-700">Welcome!</h2>
+                         <button id="close-account-drawer-btn-logged-out" class="text-slate-500 hover:text-slate-800 text-sm flex items-center gap-1"><i class="fas fa-times"></i> Close</button>
+                     </div>
+                 </div>
+                 <div class="p-2 bg-slate-100 flex gap-2">
+                     <button id="drawer-login-tab-btn" class="tab-button active flex-1 bg-white p-2 rounded-md font-semibold border-b-2">Login</button>
+                     <button id="drawer-signup-tab-btn" class="tab-button flex-1 bg-white p-2 rounded-md font-semibold text-slate-500 border-b-2 border-transparent">Sign Up</button>
+                 </div>
+                 <div class="p-6" style="max-height: 70vh; overflow-y: auto;">
+                     <form id="drawer-login-form" class="space-y-4">
+                         <input type="email" id="drawer-login-email" placeholder="Email" required class="w-full p-3 border rounded-md">
+                         <input type="password" id="drawer-login-password" placeholder="Password" required class="w-full p-3 border rounded-md">
+                         <button type="submit" class="w-full bg-amber-600 text-white p-3 rounded-md hover:bg-amber-700">Login</button>
+                         <p id="drawer-login-error" class="text-red-500 text-sm text-center"></p>
+                     </form>
+                     <form id="drawer-signup-form" class="space-y-4 hidden">
+                         <input type="text" id="drawer-signup-name" placeholder="Full Name" required class="w-full p-3 border rounded-md">
+                         <input type="email" id="drawer-signup-email" placeholder="Email" required class="w-full p-3 border rounded-md">
+                         <input type="password" id="drawer-signup-password" placeholder="Password" required class="w-full p-3 border rounded-md">
+                         <input type="tel" id="drawer-signup-phone" placeholder="Phone Number" required class="w-full p-3 border rounded-md">
+                         <input type="text" id="drawer-signup-address" placeholder="Address" required class="w-full p-3 border rounded-md">
+                         <div class="grid grid-cols-2 gap-4">
+                             <input type="text" id="drawer-signup-city" placeholder="City" required class="w-full p-3 border rounded-md">
+                             <input type="text" id="drawer-signup-district" placeholder="District" required class="w-full p-3 border rounded-md">
+                         </div>
+                         <input type="text" id="drawer-signup-postal-code" placeholder="Postal Code" required class="w-full p-3 border rounded-md">
+                         <button type="submit" class="w-full bg-amber-600 text-white p-3 rounded-md hover:bg-amber-700">Create Account</button>
+                         <p id="drawer-signup-error" class="text-red-500 text-sm text-center"></p>
+                     </form>
+                 </div>
             </div>
-
         </div>
+    </div>
+
+    <div id="main-menu-drawer-modal" class="drawer-modal fixed inset-0 z-50 hidden md:hidden">
+         <div id="main-menu-drawer-bg" class="drawer-bg fixed inset-0 modal-bg opacity-0 transition-opacity"></div>
+         <div id="main-menu-drawer" class="drawer drawer-left fixed top-0 left-0 h-full bg-white shadow-xl w-full max-w-xs flex flex-col">
+            <div class="flex flex-col h-full">
+                <div class="p-4 flex justify-between items-center border-b flex-shrink-0 bg-slate-50">
+                    <h2 class="text-lg font-semibold text-slate-800 uppercase">Menu</h2>
+                    <button id="close-main-menu-drawer-btn" class="text-slate-500 hover:text-slate-800 text-sm flex items-center gap-1"><i class="fas fa-times"></i> Close</button>
+                </div>
+                <div class="p-4 border-b">
+                    <div class="flex border border-gray-300 rounded-md overflow-hidden">
+                        <input type="text" id="drawer-search-bar" placeholder="Search for products" class="w-full px-4 py-2 focus:outline-none text-sm">
+                        <button id="drawer-search-btn" class="bg-gray-100 px-4 text-gray-600 hover:bg-gray-200"><i class="fas fa-search"></i></button>
+                    </div>
+                </div>
+                <div class="flex border-b">
+                    <button id="drawer-menu-tab-btn" class="drawer-tab active flex-1 py-3 text-sm font-semibold uppercase tracking-wider"> Menu </button>
+                    <button id="drawer-categories-tab-btn" class="drawer-tab flex-1 py-3 text-sm font-semibold uppercase tracking-wider text-gray-500"> Categories </button>
+                </div>
+                <div class="flex-grow overflow-y-auto">
+                    <nav id="drawer-menu-content" class="text-gray-700">
+                        <a href="index.html" class="drawer-menu-link">HOME</a>
+                        <a href="shop.html" class="drawer-menu-link">SHOP</a>
+                        <a href="about.html" class="drawer-menu-link">ABOUT US</a>
+                        <a href="contact.html" class="drawer-menu-link active-link">CONTACT US</a> <div class="px-5 py-3 mt-2 bg-slate-50 border-y"> <span class="text-xs font-semibold text-gray-500 uppercase">My Account</span> </div>
+                        <a href="wishlist.html" class="drawer-menu-link flex items-center gap-3"> <i class="fas fa-heart w-4 text-center text-gray-500"></i> <span>WISHLIST</span> </a>
+                        <a href="#" class="drawer-menu-link flex items-center gap-3"> <i class="fas fa-exchange-alt w-4 text-center text-gray-500"></i> <span>COMPARE</span> </a>
+                        <button id="drawer-my-account-btn" class="drawer-menu-link w-full flex justify-between items-center text-left"> <span class="flex items-center gap-3"> <i class="fas fa-user w-4 text-center text-gray-500"></i> <span>MY ACCOUNT</span> </span> <i class="fas fa-chevron-right text-xs text-gray-400"></i> </button>
+                    </nav>
+                    <div id="main-menu-category-list" class="category-drawer hidden"> <p class="p-4 text-slate-500">Loading categories...</p> </div>
+                </div>
+            </div>
+         </div>
+    </div>
+
+    <div id="cart-modal" class="fixed inset-0 z-50 hidden">
+           <div id="cart-modal-bg" class="fixed inset-0 modal-bg"></div>
+           <div id="cart-drawer" class="fixed top-0 right-0 h-full bg-white shadow-xl flex flex-col">
+                 <div class="p-4 flex justify-between items-center border-b flex-shrink-0">
+                     <h2 class="text-xl font-semibold text-slate-800">Shopping cart</h2>
+                     <button id="close-cart-btn" class="text-slate-500 hover:text-slate-800 text-sm flex items-center gap-1"> <i class="fas fa-times"></i> Close </button>
+                 </div>
+                 <div class="flex-grow p-6 overflow-y-auto">
+                     <div id="cart-items-container" class="divide-y divide-slate-100"> <p class="text-slate-500 py-6 text-center">Your cart is empty.</p> </div>
+                 </div>
+                 <div class="p-6 border-t bg-slate-50 flex-shrink-0">
+                     <div class="flex justify-between items-center mb-2"> <span class="text-lg font-medium text-slate-600">Subtotal:</span> <span id="cart-total" class="text-xl font-bold text-amber-600">Rs. 0.00</span> </div>
+                     <p class="text-sm text-center text-slate-500 mb-2">Shipping & taxes calculated at checkout.</p>
+                     <div class="flex flex-col gap-3 mt-4"> <a href="cart.html" class="w-full text-center bg-white border-2 border-amber-600 text-amber-600 p-3 rounded-lg hover:bg-amber-50 font-bold text-base"> VIEW CART </a> <a href="checkout.html" id="checkout-btn-modal" class="w-full text-center bg-amber-600 text-white p-3 rounded-lg hover:bg-amber-700 font-bold text-base"> CHECKOUT </a> </div>
+                 </div>
+           </div>
+     </div>
+
+    <div id="tracking-modal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl m-4" style="max-height: 90vh;">
+            <div class="p-6 flex justify-between items-center border-b">
+                <h2 class="text-3xl font-bold text-slate-800">My Orders</h2>
+                <button id="close-tracking-btn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button>
+            </div>
+            <div id="tracking-items-container" class="p-6 flex flex-col" style="max-height: calc(90vh - 100px); overflow-y: auto;">
+                <p class="text-slate-500 text-center">Loading your orders...</p>
+            </div>
+        </div>
+    </div>
+
+    <header class="sticky top-0 z-40 bg-white shadow-md">
+        <div class="header-top-bar text-white py-1.5 text-xs md:text-[0.7rem] md:font-medium md:uppercase md:tracking-wider">
+            <div class="container mx-auto px-4 flex justify-center md:justify-between items-center">
+                 <span class="hidden md:inline">Your Ultimate Destination</span>
+                 <div class="hidden md:flex items-center space-x-4"> <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a> <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a> <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a> <span class="border-l border-amber-400 h-4 opacity-50"></span> <a href="#">Newsletter</a> <a href="contact.html">Contact Us</a> <a href="#">FAQs</a> </div>
+                 <div class="flex items-center space-x-4 md:hidden"> <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a> <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a> <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a> </div>
+            </div>
+        </div>
+        <div class="py-4 border-b">
+            <div class="container mx-auto px-4 flex justify-between items-center gap-4">
+                 <button id="hamburger-menu-btn" class="text-gray-600 hover:text-amber-700 md:hidden text-xl p-1"> <i class="fas fa-bars"></i> </button>
+                 <a href="index.html" id="logo-btn" class="flex-shrink-0 hidden md:inline-block"> <img src="LOGO.png" alt="TPA - The Phone Arcade" class="h-10 md:h-12"> </a>
+                 <div class="flex-grow flex justify-center md:hidden"> <a href="index.html" id="mobile-logo-btn"> <img src="LOGO.png" alt="TPA" class="h-10"> </a> </div>
+                 <div class="flex-grow hidden md:flex border border-gray-300 rounded-md overflow-hidden max-w-xl"> <input type="text" id="search-bar" placeholder="Search for products" class="w-full px-4 py-2 focus:outline-none text-sm"> <select id="search-category-dropdown" class="border-l border-gray-300 px-2 text-sm text-gray-600 focus:outline-none bg-gray-50 hidden md:block"> <option value="all">ALL CATEGORIES</option> </select> <button id="search-icon-btn" class="bg-gray-100 px-4 text-gray-600 hover:bg-gray-200"> <i class="fas fa-search"></i> </button> </div>
+                 <div class="flex items-center space-x-3 md:space-x-4 text-gray-700 text-sm">
+                     <div id="auth-links" class="hidden md:flex items-center space-x-1"> <button id="login-btn-nav" class="hover:text-amber-700">LOGIN</button> <span>/</span> <button id="signup-btn-nav" class="hover:text-amber-700">REGISTER</button> </div>
+                     <div id="user-info" class="hidden md:flex items-center space-x-2"> <a href="profile.html" class="flex items-center gap-2 hover:text-amber-700 p-1 rounded-md"> <i class="fas fa-user-circle text-2xl text-gray-500"></i> <span id="user-email" class="hidden lg:inline font-medium text-gray-700"></span> </a> <span class="text-gray-400">|</span> <button id="logout-btn-nav" class="hover:text-red-600 text-gray-600 font-medium uppercase text-xs tracking-wider">Logout</button> </div>
+                     <a href="wishlist.html" title="Wishlist" class="relative hover:text-amber-700 hidden md:flex items-center"> <i class="fas fa-heart text-xl"></i> <span id="wishlist-count-badge" class="absolute -top-1 -right-1 bg-amber-600 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">0</span> </a>
+                     <a href="#" title="Compare" class="relative hover:text-amber-700 hidden md:flex items-center"> <i class="fas fa-exchange-alt text-xl"></i> <span class="absolute -top-1 -right-1 bg-amber-600 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">0</span> </a>
+                     <a href="cart.html" id="cart-icon" title="Cart" class="relative hover:text-amber-700 hidden md:flex items-center"> <i class="fas fa-shopping-bag text-xl"></i> <span id="cart-count-badge" class="absolute -top-1 -right-1 bg-amber-600 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-bold">0</span> <span class="ml-2 font-semibold hidden lg:inline">Rs.0.00</span> </a>
+                     <button id="mobile-header-cart-btn" title="Cart" class="relative hover:text-amber-700 md:hidden text-gray-600 text-xl p-1"> <i class="fas fa-shopping-bag"></i> <span id="mobile-header-cart-badge" class="absolute -top-1 -right-1.5 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> </button>
+                     <button id="tracking-icon-btn" title="Track My Orders" class="relative hover:text-amber-700 hidden md:inline-block"> <i class="fas fa-clipboard-list text-xl"></i> </button>
+                 </div>
+            </div>
+        </div>
+        <nav class="main-nav hidden md:block bg-white border-b">
+            <div class="container mx-auto px-4 flex justify-between items-center h-12"> <div class="flex space-x-6 text-sm font-medium"> <a href="index.html" class="text-gray-700 hover:text-amber-700">HOME</a> <a href="shop.html" class="text-gray-700 hover:text-amber-700">SHOP</a> <a href="about.html" class="text-gray-700 hover:text-amber-700">ABOUT US</a> <a href="contact.html" class="text-amber-600 hover:text-gray-900 font-semibold">CONTACT US</a> </div> <a href="#" class="text-amber-600 font-semibold text-sm flex items-center gap-1 hover:text-gray-900"> <i class="fas fa-heart text-xs"></i> SPECIAL OFFERS </a> </div>
+        </nav>
+    </header>
+
+     <main class="container mx-auto px-4 py-12 md:px-8 md:py-16">
+         <div class="text-center mb-12 border-b pb-6">
+             <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Contact Us</h1>
+         </div>
+
+         <div class="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
+             <div>
+                 <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Information Questions</p>
+                 <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-6">FREQUENTLY ASKED QUESTIONS</h2>
+                 <div id="faq-accordion" class="border-t border-gray-200">
+                     <div class="faq-item"> <button class="faq-question active"> <span>Can I get my phone repaired at your store?</span> <i class="fas fa-chevron-down"></i> </button> <div class="faq-answer" style="max-height: fit-content;"> <p>Absolutely! We have a team of skilled technicians who can diagnose and repair various phone issues. Whether it's a broken screen, battery replacement, or software problem, we can help. Bring your phone to our store, and we'll provide you with a repair assessment and an estimated cost.</p> </div> </div>
+                     <div class="faq-item"> <button class="faq-question"><span>Do you sell phone accessories?</span><i class="fas fa-chevron-down"></i></button> <div class="faq-answer"><p>Yes, we offer a wide range of phone accessories including cases, screen protectors, chargers, cables, headphones, and more. Visit our store or browse our online shop to see our selection.</p></div> </div>
+                     <div class="faq-item"> <button class="faq-question"><span>What payment methods do you accept?</span><i class="fas fa-chevron-down"></i></button> <div class="faq-answer"><p>We accept various payment methods, including cash, major credit cards (Visa, MasterCard, AMEX), debit cards, and popular mobile payment options like Koko and MintPay. Online purchases can be made securely via card or bank transfer.</p></div> </div>
+                     <div class="faq-item"> <button class="faq-question"><span>Can I buy products from your store online?</span><i class="fas fa-chevron-down"></i></button> <div class="faq-answer"><p>Yes, most of our products are available for purchase through our website. We offer islandwide delivery options for your convenience. Check our <a href="shop.html" class="text-amber-600 hover:underline">Shop</a> page.</p></div> </div>
+                     <div class="faq-item"> <button class="faq-question"><span>What brands of mobile phones do you sell?</span><i class="fas fa-chevron-down"></i></button> <div class="faq-answer"><p>We carry a variety of popular mobile phone brands including Apple (iPhone), Samsung, Google Pixel, Huawei, Xiaomi, and more. Our inventory is regularly updated with the latest models.</p></div> </div>
+                 </div>
+             </div>
+
+             <div>
+                 <p class="text-xs text-gray-500 uppercase tracking-wider mb-1">Information About Us</p>
+                 <h2 class="text-xl md:text-2xl font-semibold text-gray-800 mb-6">CONTACT US FOR ANY QUESTIONS</h2>
+                 <form id="contact-form" class="space-y-5">
+                     <div><input type="text" id="contact-name" name="name" required placeholder="Your name" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"></div>
+                     <div><input type="email" id="contact-email" name="email" required placeholder="Your email" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"></div>
+                     <div><input type="text" id="contact-subject" name="subject" required placeholder="Subject" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"></div>
+                     <div><textarea id="contact-message" name="message" rows="6" placeholder="Your message (optional)" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 bg-gray-50"></textarea></div>
+                     <div> <button type="button" id="submit-contact-form" class="w-auto bg-amber-600 text-white px-8 py-3 rounded-md hover:bg-amber-700 font-semibold text-sm tracking-wide transition duration-200"> SUBMIT </button> </div>
+                 </form>
+             </div>
+         </div>
      </main>
 
+    <footer class="site-footer border-t pt-10 mt-10 hidden md:block">
+        <div class="container mx-auto px-4 pb-10">
+             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                  <div class="space-y-4"> <img src="LOGO.png" alt="TPA - The Phone Arcade" class="h-10 mb-4"> <p>High-quality electronics, essentials & appliances are now at your fingertips. Confirm your order now !</p> <p><i class="fas fa-map-marker-alt mr-2 text-amber-700"></i> 890/a Main Street, Kaduruwela, Polonnaruwa</p> <p><i class="fas fa-phone-alt mr-2 text-amber-700"></i> Phone: 077 754 9654 / 027 222 4470</p> <p><i class="fas fa-envelope mr-2 text-amber-700"></i> Email: info@thephonearcade.com</p> </div>
+                  <div> <h4>Quick Links</h4> <ul class="space-y-2"> <li><a href="index.html">Home</a></li> <li><a href="shop.html">Shop</a></li> <li><a href="about.html">About Us</a></li> <li><a href="contact.html">Contact Us</a></li> <li><a href="#">Special Offers</a></li> </ul> </div>
+                  <div> <h4>Useful Links</h4> <ul class="space-y-2"> <li><a href="#">Privacy Policy</a></li> <li><a href="#">Returns</a></li> <li><a href="#">Terms & Conditions</a></li> <li><a href="#">Contact Us</a></li> <li><a href="#">Latest News</a></li> <li><a href="#">Our Sitemap</a></li> </ul> </div>
+                  <div> <h4>My Account</h4> <ul class="space-y-2"> <li><a href="profile.html">My Profile</a></li> <li><a href="cart.html">View Cart</a></li> <li><a href="#" id="footer-orders-link">Track My Orders</a></li> <li><a href="wishlist.html">My Wishlist</a></li> </ul> </div>
+             </div>
+        </div>
+        <div class="footer-bottom py-4 px-4"> <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left"> <span>TPA © 2025 CREATED BY <a href="https://pixora.com" target="_blank" rel="noopener noreferrer" class="font-semibold hover:text-amber-700">PIXORA IT SOLUTIONS</a></span> <div class="flex space-x-2 mt-4 md:mt-0"> <i class="fab fa-cc-visa text-2xl"></i> <i class="fab fa-cc-amex text-2xl"></i> <i class="fab fa-cc-paypal text-2xl"></i> <i class="fab fa-cc-mastercard text-2xl"></i> <i class="fab fa-cc-discover text-2xl"></i> </div> </div> </div>
+    </footer>
 
-   <footer class="site-footer border-t pt-10 mt-10">
-          <div class="container mx-auto px-4 pb-10">
-               <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    <div class="space-y-4">
-                         <img src="LOGO.png" alt="TPA - The Phone Arcade" class="h-10 mb-4">
-                         <p>High-quality electronics, essentials & appliances are now at your fingertips. Confirm your order now !</p>
-                         <p><i class="fas fa-map-marker-alt mr-2 text-amber-700"></i> 890/a Main Street, Kaduruwela, Polonnaruwa</p>
-                         <p><i class="fas fa-phone-alt mr-2 text-amber-700"></i> Phone: 077 754 9654 / 027 222 4470</p>
-                         <p><i class="fas fa-envelope mr-2 text-amber-700"></i> Email: info@thephonearcade.com</p>
-                    </div>
-                    <div>
-                         <h4>Quick Links</h4>
-                         <ul class="space-y-2">
-                              <li><a href="index.html">Home</a></li>
-                              <li><a href="shop.html">Shop</a></li>
-                              <li><a href="about.html">About Us</a></li>
-                              <li><a href="contact.html">Contact Us</a></li>
-                              <li><a href="#">Special Offers</a></li>
-                         </ul>
-                    </div>
-                    <div>
-                         <h4>Useful Links</h4>
-                         <ul class="space-y-2">
-                              <li><a href="#">Privacy Policy</a></li>
-                              <li><a href="#">Returns</a></li>
-                              <li><a href="#">Terms & Conditions</a></li>
-                              <li><a href="#">Contact Us</a></li>
-                              <li><a href="#">Latest News</a></li>
-                              <li><a href="#">Our Sitemap</a></li>
-                         </ul>
-                    </div>
-                    <div>
-                         <h4>My Account</h4>
-                         <ul class="space-y-2">
-                              <li><a href="profile.html">My Profile</a></li>
-                              <li><a href="cart.html">View Cart</a></li>
-                              <li><a href="#" id="footer-orders-link">Track My Orders</a></li>
-                              <li><a href="wishlist.html">My Wishlist</a></li>
-                         </ul>
-                    </div>
-               </div>
-          </div>
-          <div class="footer-bottom py-4 px-4">
-               <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-                    <span>TPA © 2025 CREATED BY <a href="https://pixora.com" target="_blank" rel="noopener noreferrer" class="font-semibold hover:text-amber-700">PIXORA IT SOLUTIONS</a></span>
-                    <div class="flex space-x-2 mt-4 md:mt-0">
-                         <i class="fab fa-cc-visa text-2xl"></i>
-                         <i class="fab fa-cc-amex text-2xl"></i>
-                         <i class="fab fa-cc-paypal text-2xl"></i>
-                         <i class="fab fa-cc-mastercard text-2xl"></i>
-                         <i class="fab fa-cc-discover text-2xl"></i>
-                         </div>
-               </div>
-          </div>
-     </footer>
-     <script type="module">
-    
-    // Firebase Imports
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"; 
-    
-    // Firebase Config
-    const firebaseConfig = {
-     apiKey: "AIzaSyAtvnbedBpCiRe_ZyfoB-TacrboEMgft5Y", authDomain: "mobile-shop-1c315.firebaseapp.com", projectId: "mobile-shop-1c315", storageBucket: "mobile-shop-1c315.firebasestorage.app", messagingSenderId: "689278786227", appId: "1:689278786227:web:ee06565e4a230381bf6ec6", measurementId: "G-MLDEWBBEMV"
-    };
-    
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const ordersCol = collection(db, 'orders'); 
+    <nav class="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 shadow-[0_-2px_6px_rgba(0,0,0,0.06)] md:hidden z-40 flex justify-around items-center">
+        <a href="index.html" class="flex flex-col items-center justify-center text-gray-600 hover:text-amber-600 text-xs w-1/4"> <i class="fas fa-store text-xl"></i> <span class="mt-1">Shop</span> </a>
+        <a href="wishlist.html" class="flex flex-col items-center justify-center text-gray-600 hover:text-amber-600 text-xs w-1/4 relative"> <div class="relative"> <i class="fas fa-heart text-xl"></i> <span id="mobile-wishlist-badge" class="absolute -top-1 -right-2.5 bg-amber-600 text-white text-xs font-semibold rounded-full h-4 w-4 flex items-center justify-center">0</span> </div> <span class="mt-1">Wishlist</span> </a>
+        <a href="cart.html" id="mobile-cart-link" class="flex flex-col items-center justify-center text-gray-600 hover:text-amber-600 text-xs w-1/4 relative"> <div class="relative"> <i class="fas fa-shopping-bag text-xl"></i> <span id="mobile-cart-badge" class="absolute -top-1 -right-2.5 bg-amber-600 text-white text-xs font-semibold rounded-full h-4 w-4 flex items-center justify-center">0</span> </div> <span class="mt-1">Cart</span> </a>
+        <a href="profile.html" id="mobile-account-link" class="flex flex-col items-center justify-center text-gray-600 hover:text-amber-600 text-xs w-1/4"> <i class="fas fa-user text-xl"></i> <span class="mt-1">My account</span> </a>
+    </nav>
 
-    // Header & Modal DOM Elements
-    const authModal = document.getElementById('auth-modal');
-    const closeModalBtn = document.getElementById('close-modal-btn');
-    const loginBtnNav = document.getElementById('login-btn-nav');
-    const signupBtnNav = document.getElementById('signup-btn-nav');
-    const logoutBtnNav = document.getElementById('logout-btn-nav');
-    const loginTab = document.getElementById('login-tab-btn');
-    const signupTab = document.getElementById('signup-tab-btn');
-    const loginForm = document.getElementById('login-form');
-    const signupForm = document.getElementById('signup-form');
-    const authLinks = document.getElementById('auth-links');
-    const userInfo = document.getElementById('user-info');
-    const userEmailSpan = document.getElementById('user-email');
-    const trackingModal = document.getElementById('tracking-modal');
-    const closeTrackingBtn = document.getElementById('close-tracking-btn');
-    const trackingIconBtn = document.getElementById('tracking-icon-btn');
-    const trackingItemsContainer = document.getElementById('tracking-items-container'); 
-    const footerOrdersLink = document.getElementById('footer-orders-link');
-    const cartCountBadge = document.getElementById('cart-count-badge');
-    const wishlistCountBadge = document.getElementById('wishlist-count-badge');
-    
-    // CONTACT PAGE DOM ELEMENTS
-    const faqAccordion = document.getElementById('faq-accordion');
-    const contactForm = document.getElementById('contact-form');
-    const submitContactBtn = document.getElementById('submit-contact-form');
+    <a href="https://wa.me/94777349654?text=Hello%20TPA%2C%20I'd%20like%20to%20ask%20a%20question."
+         class="fixed-chat-button"
+         aria-label="Chat on WhatsApp"
+         target="_blank"
+         rel="noopener noreferrer">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 
+    <script type="module">
 
-    // --- Helper Functions (Cart & Wishlist) ---
-    const getCart = () => JSON.parse(localStorage.getItem('mobileHubCart')) || [];
-    const saveCart = (cart) => localStorage.setItem('mobileHubCart', JSON.stringify(cart));
-    const updateCartCountBadge = () => { const cart = getCart(); const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0); if (cartCountBadge) { if (totalItems > 0) { cartCountBadge.textContent = totalItems; cartCountBadge.classList.remove('hidden'); cartCountBadge.classList.add('pop'); setTimeout(() => cartCountBadge.classList.remove('pop'), 200); } else { cartCountBadge.textContent = '0'; cartCountBadge.classList.remove('hidden', 'pop'); } } };
-    
-    const getWishlist = () => JSON.parse(localStorage.getItem('mobileHubWishlist')) || [];
-    const saveWishlist = (wishlist) => localStorage.setItem('mobileHubWishlist', JSON.stringify(wishlist));
-    const updateWishlistCountBadge = () => { const wishlist = getWishlist(); const totalItems = wishlist.length; if (wishlistCountBadge) { if (totalItems > 0) { wishlistCountBadge.textContent = totalItems; wishlistCountBadge.classList.remove('hidden'); } else { wishlistCountBadge.textContent = '0'; } wishlistCountBadge.classList.add('pop'); setTimeout(() => wishlistCountBadge.classList.remove('pop'), 200); } };
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, orderBy, getDocs, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"; // Added onSnapshot
 
-    // --- Header & Auth Logic ---
-    const openModal = (isLogin = true) => { /* ... */ }; if(loginBtnNav) loginBtnNav.addEventListener('click', () => openModal(true)); /* ... (Anith auth modal code okkoma methana) ... */
-    if(loginForm) loginForm.addEventListener('submit', async (e) => { /* ... */ }); if(signupForm) signupForm.addEventListener('submit', async (e) => { /* ... */ }); 
-    if(logoutBtnNav) logoutBtnNav.addEventListener('click', () => { signOut(auth).then(() => { window.location.href = 'index.html'; }); }); 
-    
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            if(authLinks) { authLinks.classList.add('hidden'); authLinks.classList.remove('md:block'); }
-            if(userInfo) { userInfo.classList.remove('hidden'); userInfo.classList.add('flex'); }
-            if(userEmailSpan) userEmailSpan.textContent = user.email;
-        } else {
-            if(authLinks) { authLinks.classList.remove('hidden'); authLinks.classList.add('md:block'); }
-            if(userInfo) { userInfo.classList.add('hidden'); userInfo.classList.remove('flex'); }
-            if(userEmailSpan) userEmailSpan.textContent = '';
+        // Firebase Config
+        const firebaseConfig = {
+         apiKey: "AIzaSyAtvnbedBpCiRe_ZyfoB-TacrboEMgft5Y", authDomain: "mobile-shop-1c315.firebaseapp.com", projectId: "mobile-shop-1c315", storageBucket: "mobile-shop-1c315.firebasestorage.app", messagingSenderId: "689278786227", appId: "1:689278786227:web:ee06565e4a230381bf6ec6", measurementId: "G-MLDEWBBEMV"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Firestore Collections
+        const ordersCol = collection(db, 'orders');
+        const categoriesCol = collection(db, 'categories');
+
+        // --- DOM Elements ---
+        // Header, Search, Desktop Auth
+        const logoBtn = document.getElementById('logo-btn');
+        const mobileLogoBtn = document.getElementById('mobile-logo-btn');
+        const searchBar = document.getElementById('search-bar');
+        const searchCategoryDropdown = document.getElementById('search-category-dropdown');
+        const searchIconBtn = document.getElementById('search-icon-btn');
+        const authLinks = document.getElementById('auth-links'); // Desktop Login/Register links
+        const userInfo = document.getElementById('user-info'); // Desktop User Info section
+        const userEmailSpan = document.getElementById('user-email'); // Desktop user email display
+        const loginBtnNav = document.getElementById('login-btn-nav'); // Desktop login button
+        const signupBtnNav = document.getElementById('signup-btn-nav'); // Desktop signup button
+        const logoutBtnNav = document.getElementById('logout-btn-nav'); // Desktop logout button
+
+        // Account Drawer (Mobile Auth Modal)
+        const accountDrawerModal = document.getElementById('account-drawer-modal');
+        const accountDrawerBg = document.getElementById('account-drawer-bg');
+        const closeAccountDrawerBtnLoggedIn = document.getElementById('close-account-drawer-btn-logged-in');
+        const closeAccountDrawerBtnLoggedOut = document.getElementById('close-account-drawer-btn-logged-out');
+        const accountDrawerLoggedIn = document.getElementById('account-drawer-logged-in');
+        const accountDrawerLoggedOut = document.getElementById('account-drawer-logged-out');
+        const accountDrawerUserEmail = document.getElementById('account-drawer-user-email'); // Email in drawer
+        const drawerLogoutBtn = document.getElementById('drawer-logout-btn'); // Logout in drawer
+        const loginTab = document.getElementById('drawer-login-tab-btn'); // Login tab in drawer
+        const signupTab = document.getElementById('drawer-signup-tab-btn'); // Signup tab in drawer
+        const loginForm = document.getElementById('drawer-login-form'); // Login form in drawer
+        const signupForm = document.getElementById('drawer-signup-form'); // Signup form in drawer
+
+        // Main Menu Drawer (Mobile Navigation)
+        const hamburgerMenuBtn = document.getElementById('hamburger-menu-btn');
+        const mainMenuDrawerModal = document.getElementById('main-menu-drawer-modal');
+        const mainMenuDrawerBg = document.getElementById('main-menu-drawer-bg');
+        const closeMainMenuDrawerBtn = document.getElementById('close-main-menu-drawer-btn');
+        const mainMenuCategoryList = document.getElementById('main-menu-category-list');
+        const drawerSearchBtn = document.getElementById('drawer-search-btn'); // Search button in drawer
+        const drawerSearchBar = document.getElementById('drawer-search-bar'); // Search bar in drawer
+        const drawerMenuTabBtn = document.getElementById('drawer-menu-tab-btn'); // Menu tab in drawer
+        const drawerCategoriesTabBtn = document.getElementById('drawer-categories-tab-btn'); // Categories tab in drawer
+        const drawerMenuContent = document.getElementById('drawer-menu-content'); // Menu links in drawer
+        const drawerMyAccountBtn = document.getElementById('drawer-my-account-btn'); // Account button in drawer
+
+        // Cart (Modal + Badges)
+        const cartCountBadge = document.getElementById('cart-count-badge'); // Desktop header badge
+        const cartIcon = document.getElementById('cart-icon'); // Desktop header icon link
+        const mobileHeaderCartBtn = document.getElementById('mobile-header-cart-btn'); // Mobile header cart icon button
+        const mobileHeaderCartBadge = document.getElementById('mobile-header-cart-badge'); // Mobile header cart badge
+        const cartModal = document.getElementById('cart-modal'); // Cart drawer modal
+        const cartModalBg = document.getElementById('cart-modal-bg'); // Cart drawer background
+        const closeCartBtn = document.getElementById('close-cart-btn'); // Close button in cart drawer
+        const cartItemsContainer = document.getElementById('cart-items-container'); // Container for items in cart drawer
+        const cartTotalEl = document.getElementById('cart-total'); // Total display in cart drawer
+
+        // Wishlist (Badges)
+        const wishlistCountBadge = document.getElementById('wishlist-count-badge'); // Desktop header badge
+        const mobileWishlistBadge = document.getElementById('mobile-wishlist-badge'); // Mobile bottom nav badge
+
+        // Mobile Bottom Nav Links
+        const mobileCartLink = document.getElementById('mobile-cart-link'); // Cart link in bottom nav
+        const mobileAccountLink = document.getElementById('mobile-account-link'); // Account link in bottom nav
+
+        // Tracking Modal
+        const trackingModal = document.getElementById('tracking-modal');
+        const closeTrackingBtn = document.getElementById('close-tracking-btn');
+        const trackingIconBtn = document.getElementById('tracking-icon-btn'); // Header tracking icon button
+        const trackingItemsContainer = document.getElementById('tracking-items-container');
+        const footerOrdersLink = document.getElementById('footer-orders-link'); // Footer tracking link
+
+        // Contact Page Specific DOM Elements
+        const faqAccordion = document.getElementById('faq-accordion');
+        const contactForm = document.getElementById('contact-form');
+        const submitContactBtn = document.getElementById('submit-contact-form');
+
+        // --- Global State ---
+        let currentUser = null;
+        let currentUserDocRef = null;
+        let categoriesCache = [];
+
+        // --- Drawer/Modal Open/Close Functions ---
+        const openAccountDrawer = () => { if(accountDrawerModal) accountDrawerModal.classList.remove('hidden'); }
+        const closeAccountDrawer = () => { if(accountDrawerModal) accountDrawerModal.classList.add('hidden'); }
+        const openMainMenuDrawer = () => { if(mainMenuDrawerModal) mainMenuDrawerModal.classList.remove('hidden'); }
+        const closeMainMenuDrawer = () => { if(mainMenuDrawerModal) mainMenuDrawerModal.classList.add('hidden'); }
+        const openCartModal = (e) => { e.preventDefault(); renderCartModal(); if(cartModal) cartModal.classList.remove('hidden'); };
+        const closeCartModal = () => { if(cartModal) cartModal.classList.add('hidden'); };
+        const openTrackingModal = (e) => { e.preventDefault(); if(trackingModal) trackingModal.classList.remove('hidden'); loadUserOrders(true); } // Pass true for modal version
+        const closeTrackingModal = () => { if(trackingModal) trackingModal.classList.add('hidden'); };
+
+        // --- Auth State Change (Main Handler - Adapted for non-profile page) ---
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                currentUserDocRef = doc(db, "users", user.uid);
+                // Update Header/Desktop UI
+                if(authLinks) authLinks.classList.add('hidden');
+                // Update Account Drawer UI
+                if(accountDrawerLoggedIn) accountDrawerLoggedIn.classList.remove('hidden'); if(accountDrawerLoggedIn) accountDrawerLoggedIn.classList.add('flex');
+                if(accountDrawerLoggedOut) accountDrawerLoggedOut.classList.add('hidden'); if(accountDrawerLoggedOut) accountDrawerLoggedOut.classList.remove('flex');
+                // Update Mobile Bottom Nav
+                if(mobileAccountLink) { mobileAccountLink.href = 'profile.html'; mobileAccountLink.onclick = null; }
+
+                // Fetch and display user email/role
+                try {
+                     const userDoc = await getDoc(currentUserDocRef);
+                     const userData = userDoc.exists() ? userDoc.data() : {};
+                     const userDisplayName = userData.role === "admin" ? `${user.email} (Admin)` : user.email;
+                     if(userEmailSpan) userEmailSpan.textContent = userDisplayName; // Header
+                     if(accountDrawerUserEmail) accountDrawerUserEmail.textContent = userDisplayName; // Drawer
+                } catch (error) {
+                     console.error("Error fetching user role: ", error);
+                     if(userEmailSpan) userEmailSpan.textContent = user.email; // Fallback for header
+                     if(accountDrawerUserEmail) accountDrawerUserEmail.textContent = user.email; // Fallback for drawer
+                }
+                closeAccountDrawer();
+
+            } else { // User is logged out
+                currentUserDocRef = null;
+                // Update Header/Desktop UI
+                if(authLinks) authLinks.classList.remove('hidden');
+                if(userEmailSpan) userEmailSpan.textContent = '';
+                // Update Account Drawer UI
+                if(accountDrawerLoggedIn) accountDrawerLoggedIn.classList.add('hidden'); if(accountDrawerLoggedIn) accountDrawerLoggedIn.classList.remove('flex');
+                if(accountDrawerLoggedOut) accountDrawerLoggedOut.classList.remove('hidden'); if(accountDrawerLoggedOut) accountDrawerLoggedOut.classList.add('flex');
+                // Update Mobile Bottom Nav
+                if(mobileAccountLink) {
+                     mobileAccountLink.href = '#';
+                     mobileAccountLink.onclick = (e) => { e.preventDefault(); openAccountDrawer(); };
+                }
+            }
+            // Update badges regardless of auth state
+            updateCartCountBadge();
+            updateWishlistCountBadge();
+        });
+
+        // --- Auth Form Logic (Drawer) ---
+        // (Copied directly from profile.html - Handles drawer login/signup)
+        if(loginBtnNav) loginBtnNav.addEventListener('click', () => openAccountDrawer());
+        if(signupBtnNav) signupBtnNav.addEventListener('click', () => { openAccountDrawer(); if(signupTab) signupTab.click(); });
+        if(closeAccountDrawerBtnLoggedIn) closeAccountDrawerBtnLoggedIn.addEventListener('click', closeAccountDrawer);
+        if(closeAccountDrawerBtnLoggedOut) closeAccountDrawerBtnLoggedOut.addEventListener('click', closeAccountDrawer);
+        if(accountDrawerBg) accountDrawerBg.addEventListener('click', closeAccountDrawer);
+        if(loginTab) loginTab.addEventListener('click', () => { loginTab.classList.add('active'); if(signupTab) signupTab.classList.remove('active'); if(loginForm) loginForm.classList.remove('hidden'); if(signupForm) signupForm.classList.add('hidden'); });
+        if(signupTab) signupTab.addEventListener('click', () => { signupTab.classList.add('active'); if(loginTab) loginTab.classList.remove('active'); if(signupForm) signupForm.classList.remove('hidden'); if(loginForm) loginForm.classList.add('hidden'); });
+        if(loginForm) loginForm.addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('drawer-login-email').value; const password = document.getElementById('drawer-login-password').value; const errorP = document.getElementById('drawer-login-error'); if(errorP) errorP.textContent = 'Logging in...'; try { await signInWithEmailAndPassword(auth, email, password); } catch (error) { console.error("Login Error:", error); if(errorP) errorP.textContent = error.message; } });
+        if(signupForm) signupForm.addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('drawer-signup-email').value; const password = document.getElementById('drawer-signup-password').value; const name = document.getElementById('drawer-signup-name').value; const phone = document.getElementById('drawer-signup-phone').value; const address = document.getElementById('drawer-signup-address').value; const city = document.getElementById('drawer-signup-city').value; const district = document.getElementById('drawer-signup-district').value; const postalCode = document.getElementById('drawer-signup-postal-code').value; const errorP = document.getElementById('drawer-signup-error'); if(errorP) errorP.textContent = 'Creating account...'; try { const userCredential = await createUserWithEmailAndPassword(auth, email, password); const user = userCredential.user; const userDocRef = doc(db, "users", user.uid); await setDoc(userDocRef, { name: name, email: email, phone: phone, createdAt: serverTimestamp(), role: "customer" }); await addDoc(collection(userDocRef, "addresses"), { name: name, phone: phone, address: address, city: city, district: district, postalCode: postalCode, isDefault: true }); } catch (error) { console.error("Signup Error:", error); if(errorP) errorP.textContent = error.message; } });
+        if(drawerLogoutBtn) drawerLogoutBtn.addEventListener('click', () => { signOut(auth).then(() => { window.location.href = 'index.html'; }); });
+        if(logoutBtnNav) logoutBtnNav.addEventListener('click', () => { signOut(auth).then(() => { window.location.href = 'index.html'; }); });
+
+        // --- Main Menu Drawer Logic ---
+        if(hamburgerMenuBtn) hamburgerMenuBtn.addEventListener('click', openMainMenuDrawer);
+        if(closeMainMenuDrawerBtn) closeMainMenuDrawerBtn.addEventListener('click', closeMainMenuDrawer);
+        if(mainMenuDrawerBg) mainMenuDrawerBg.addEventListener('click', closeMainMenuDrawer);
+        if(drawerMyAccountBtn) drawerMyAccountBtn.addEventListener('click', () => { closeMainMenuDrawer(); openAccountDrawer(); });
+        if(drawerMenuTabBtn) drawerMenuTabBtn.addEventListener('click', () => { drawerMenuTabBtn.classList.add('active'); drawerMenuTabBtn.classList.remove('text-gray-500'); drawerCategoriesTabBtn.classList.remove('active'); drawerCategoriesTabBtn.classList.add('text-gray-500'); if (drawerMenuContent) drawerMenuContent.classList.remove('hidden'); if (mainMenuCategoryList) mainMenuCategoryList.classList.add('hidden'); });
+        if(drawerCategoriesTabBtn) drawerCategoriesTabBtn.addEventListener('click', () => { drawerCategoriesTabBtn.classList.add('active'); drawerCategoriesTabBtn.classList.remove('text-gray-500'); drawerMenuTabBtn.classList.remove('active'); drawerMenuTabBtn.classList.add('text-gray-500'); if (drawerMenuContent) drawerMenuContent.classList.add('hidden'); if (mainMenuCategoryList) mainMenuCategoryList.classList.remove('hidden'); });
+
+        // --- Cart Logic (Shared) ---
+        const getCart = () => JSON.parse(localStorage.getItem('mobileHubCart')) || [];
+        const saveCart = (cart) => localStorage.setItem('mobileHubCart', JSON.stringify(cart));
+        const updateCartCountBadge = () => { /* Same as profile.html */
+             const cart = getCart(); const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0); const cartTotalValue = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+             if (cartCountBadge) { if (totalItems > 0) { cartCountBadge.textContent = totalItems; cartCountBadge.classList.remove('hidden'); cartCountBadge.classList.add('pop'); setTimeout(() => cartCountBadge.classList.remove('pop'), 200); } else { cartCountBadge.textContent = '0'; cartCountBadge.classList.remove('hidden', 'pop'); } }
+             const cartTotalText = document.querySelector('#cart-icon span.lg\\:inline'); if (cartTotalText) { cartTotalText.textContent = `Rs.${cartTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`; } // Changed md:inline to lg:inline
+             if (mobileHeaderCartBadge) { if (totalItems > 0) { mobileHeaderCartBadge.textContent = totalItems; mobileHeaderCartBadge.classList.remove('hidden'); } else { mobileHeaderCartBadge.textContent = '0'; } }
+             const mobileCartBadge = document.getElementById('mobile-cart-badge'); if (mobileCartBadge) { if (totalItems > 0) { mobileCartBadge.textContent = totalItems; mobileCartBadge.classList.remove('hidden'); } else { mobileCartBadge.textContent = '0'; } }
+        };
+        const renderCartModal = () => { /* Same as profile.html */
+             const cart = getCart(); let total = 0; if (!cartItemsContainer || !cartTotalEl) return;
+             if (cart.length === 0) { cartItemsContainer.innerHTML = '<p class="text-slate-500 py-6 text-center">Your cart is empty.</p>'; cartTotalEl.textContent = 'Rs. 0.00'; return; }
+             cartItemsContainer.innerHTML = cart.map(item => { total += item.price * item.quantity; return ` <div class="flex items-center gap-4 py-4"> <img src="${item.imageUrl || 'https://via.placeholder.com/64'}" alt="${item.name}" class="w-16 h-16 rounded object-contain mix-blend-multiply bg-slate-100 p-1"> <div class="flex-grow"> <h4 class="font-semibold text-sm text-slate-800">${item.name}</h4> <div class="flex items-center gap-2 my-1"> <button data-id="${item.id}" class="cart-qty-decrease w-6 h-6 font-bold rounded bg-slate-100 hover:bg-slate-200 flex items-center justify-center">-</button> <span class="w-6 text-center font-bold text-sm text-slate-700">${item.quantity}</span> <button data-id="${item.id}" class="cart-qty-increase w-6 h-6 font-bold rounded bg-slate-100 hover:bg-slate-200 flex items-center justify-center">+</button> </div> <p class="text-sm text-amber-600 font-bold">Rs. ${item.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p> </div> <button data-id="${item.id}" class="cart-remove-item text-slate-400 hover:text-red-500" title="Remove Item"> <i class="fas fa-times text-lg"></i> </button> </div>`; }).join('');
+             cartTotalEl.textContent = `Rs. ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        };
+        if(cartIcon) cartIcon.addEventListener('click', openCartModal);
+        if(mobileCartLink) mobileCartLink.addEventListener('click', openCartModal);
+        if(mobileHeaderCartBtn) mobileHeaderCartBtn.addEventListener('click', openCartModal);
+        if(closeCartBtn) closeCartBtn.addEventListener('click', closeCartModal);
+        if(cartModalBg) cartModalBg.addEventListener('click', closeCartModal);
+        if(cartModal) cartModal.addEventListener('click', (e) => { /* Same as profile.html */
+             if (e.target === e.currentTarget || e.target === cartModalBg) return; const targetButton = e.target.closest('button, a'); if (!targetButton) return; if (targetButton.href?.includes('cart.html') || targetButton.href?.includes('checkout.html')) return; const id = targetButton.dataset.id; if (!id) return; const cart = getCart(); const itemIndex = cart.findIndex(i => i.id === id); if (itemIndex === -1) return; let cartChanged = false;
+             if (targetButton.classList.contains('cart-qty-increase')) { cart[itemIndex].quantity++; cartChanged = true; }
+             else if (targetButton.classList.contains('cart-qty-decrease')) { if (cart[itemIndex].quantity > 1) { cart[itemIndex].quantity--; cartChanged = true; } else { if (confirm('Remove item?')) { cart.splice(itemIndex, 1); cartChanged = true; } } }
+             else if (targetButton.classList.contains('cart-remove-item')) { if (confirm('Remove item?')) { cart.splice(itemIndex, 1); cartChanged = true; } }
+             if (cartChanged) { saveCart(cart); renderCartModal(); updateCartCountBadge(); }
+        });
+
+        // --- Wishlist Logic (Shared) ---
+        const getWishlist = () => JSON.parse(localStorage.getItem('mobileHubWishlist')) || [];
+        const saveWishlist = (wishlist) => localStorage.setItem('mobileHubWishlist', JSON.stringify(wishlist));
+        const updateWishlistCountBadge = () => { /* Same as profile.html */
+             const wishlist = getWishlist(); const totalItems = wishlist.length;
+             if (wishlistCountBadge) { if (totalItems > 0) { wishlistCountBadge.textContent = totalItems; wishlistCountBadge.classList.remove('hidden'); } else { wishlistCountBadge.textContent = '0'; } wishlistCountBadge.classList.add('pop'); setTimeout(() => wishlistCountBadge.classList.remove('pop'), 200); }
+             if (mobileWishlistBadge) { if (totalItems > 0) { mobileWishlistBadge.textContent = totalItems; mobileWishlistBadge.classList.remove('hidden'); } else { mobileWishlistBadge.textContent = '0'; } }
+        };
+
+        // --- Order Loading (Shared) ---
+        const loadUserOrders = async (isModal = false) => { /* Same as profile.html */
+             const container = trackingItemsContainer; // Always use the modal container here
+             if (!container) return;
+             container.innerHTML = '<p class="text-slate-500 text-center">Loading orders...</p>'; const user = auth.currentUser;
+             if (!user) { const loginHtml = ` <div class="text-center p-8"> <h3 class="text-xl font-semibold text-slate-700 mb-4">Please Log In</h3> <p class="text-slate-500 mb-6">Log in to view orders.</p> <button id="tracking-login-btn" class="bg-amber-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-amber-700">Login Now</button> </div>`; container.innerHTML = loginHtml; const btn = container.querySelector('#tracking-login-btn'); if (btn) { btn.addEventListener('click', () => { if(isModal) closeTrackingModal(); openAccountDrawer(); }); } return; }
+             try {
+                 const q = query(ordersCol, where("userId", "==", user.uid), orderBy("createdAt", "desc")); const snap = await getDocs(q);
+                 if (snap.empty) { container.innerHTML = ` <div class="text-center p-8"> <h3 class="text-xl font-semibold text-slate-700 mb-4">No Orders</h3> <p class="text-slate-500">No orders placed yet.</p> </div>`; return; }
+                 container.innerHTML = snap.docs.map(doc => { const o = doc.data() || {}; const id = doc.id; const date = o.createdAt ? o.createdAt.toDate().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A';
+                     const itemsHtml = (o.items || []).map(item => `<div class="flex items-center gap-3 py-2 border-b last:border-b-0 border-slate-200"> <img src="${item.imageUrl || 'https://via.placeholder.com/60'}" alt="${item.name || 'Item'}" class="w-12 h-12 object-contain rounded border p-1 bg-white"> <div> <p class="text-sm font-medium text-gray-700">${item.name || 'Item'}</p> <p class="text-xs text-gray-500">Qty: ${item.quantity || 1}</p> </div> </div>`).join('');
+                     let statColor = 'bg-slate-100 text-slate-700'; const statLower = (o.status || 'Pending').toLowerCase(); if (statLower === 'pending') statColor = 'bg-yellow-100 text-yellow-800'; else if (statLower === 'shipped' || statLower === 'processing') statColor = 'bg-blue-100 text-blue-800'; else if (statLower === 'delivered') statColor = 'bg-green-100 text-green-800'; else if (statLower === 'cancelled') statColor = 'bg-red-100 text-red-800';
+                     return ` <div class="bg-white border rounded-lg p-4 shadow-sm mb-4"> <div class="flex flex-col sm:flex-row justify-between items-start mb-3"> <div> <p class="text-xs text-slate-500">ID: ${id}</p> <p class="font-bold text-lg text-slate-800">Total: Rs. ${(o.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p> </div> <span class="text-sm font-bold px-3 py-1 rounded-full ${statColor} mt-2 sm:mt-0">${o.status || 'Pending'}</span> </div> <p class="text-sm text-slate-600 mb-2"><strong>Placed:</strong> ${date}</p> <div class="mb-3"> <p class="text-sm font-semibold text-slate-700 mb-1">Items:</p> <div class="space-y-1 pl-2"> ${itemsHtml || '<p class="text-sm text-slate-500">No items.</p>'} </div> </div> <div class="bg-slate-50 p-3 rounded-md"> <p class="text-sm font-semibold text-slate-700">Shipping to: ${o.customerInfo?.name || 'N/A'}</p> <p class="text-xs text-slate-500">${o.customerInfo?.address || 'N/A'}, ${o.customerInfo?.city || ''}</p> </div> </div>`;
+                 }).join('');
+             } catch (error) { console.error("Err fetching orders:", error); container.innerHTML = '<p class="text-red-500 text-center">Could not load orders.</p>'; }
+        };
+        if(trackingIconBtn) trackingIconBtn.addEventListener('click', openTrackingModal);
+        if(closeTrackingBtn) closeTrackingBtn.addEventListener('click', closeTrackingModal);
+        if(footerOrdersLink) footerOrdersLink.addEventListener('click', openTrackingModal);
+
+        // --- Search & Category Logic (Header & Drawer) ---
+        const renderCategoryNavForSearch = (categories) => { // Render categories in header dropdown and mobile drawer
+             if(searchCategoryDropdown) { let html = `<option value="all">ALL CATEGORIES</option>`; html += categories.map(c => `<option value="${c.name}">${c.name.toUpperCase()}</option>`).join(''); searchCategoryDropdown.innerHTML = html; }
+             if (mainMenuCategoryList) { let html = `<a href="shop.html?category=all" class="category-link drawer-menu-link">All Products</a>`; html += categories.map(c => `<a href="shop.html?category=${encodeURIComponent(c.name)}" class="category-link drawer-menu-link">${c.name}</a>`).join(''); mainMenuCategoryList.innerHTML = html; }
+        };
+        onSnapshot(query(categoriesCol, orderBy("name")), (snapshot) => { categoriesCache = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name })); renderCategoryNavForSearch(categoriesCache); }, error => console.error("Error fetching categories:", error));
+
+        const performSearch = () => { // Redirects to shop.html
+            const searchTerm = searchBar.value.trim(); const selectedCategory = searchCategoryDropdown.value; let url = 'shop.html?';
+            if (searchTerm) url += `search=${encodeURIComponent(searchTerm)}`; if (selectedCategory !== 'all') url += `${searchTerm ? '&' : ''}category=${encodeURIComponent(selectedCategory)}`;
+            if (url !== 'shop.html?') { window.location.href = url; } else if (!searchTerm && selectedCategory === 'all') { window.location.href = 'shop.html';}
+        };
+        const performDrawerSearch = () => { // Redirects to shop.html
+            const searchTerm = drawerSearchBar.value.trim(); if (searchTerm) { window.location.href = `shop.html?search=${encodeURIComponent(searchTerm)}`; closeMainMenuDrawer(); }
+        };
+        if(searchBar) searchBar.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
+        if(searchIconBtn) searchIconBtn.addEventListener('click', performSearch);
+        if(searchCategoryDropdown) searchCategoryDropdown.addEventListener('change', performSearch);
+        if(drawerSearchBtn) drawerSearchBtn.addEventListener('click', performDrawerSearch);
+        if(drawerSearchBar) drawerSearchBar.addEventListener('keypress', (e) => { if (e.key === 'Enter') performDrawerSearch(); });
+
+        // --- Logo Click ---
+        if (logoBtn) logoBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'index.html'; });
+        if (mobileLogoBtn) mobileLogoBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'index.html'; });
+
+        // --- Contact Page Specific Logic ---
+        if (faqAccordion) {
+            faqAccordion.addEventListener('click', (e) => {
+                const questionButton = e.target.closest('.faq-question'); if (!questionButton) return;
+                const faqItem = questionButton.parentElement; const answerDiv = faqItem.querySelector('.faq-answer');
+                faqAccordion.querySelectorAll('.faq-item').forEach(item => { const qButton = item.querySelector('.faq-question'); const aDiv = item.querySelector('.faq-answer'); if (item !== faqItem && qButton.classList.contains('active')) { qButton.classList.remove('active'); aDiv.style.maxHeight = null; } });
+                questionButton.classList.toggle('active'); answerDiv.style.maxHeight = questionButton.classList.contains('active') ? answerDiv.scrollHeight + "px" : null;
+            });
+            const initialActiveAnswer = faqAccordion.querySelector('.faq-question.active + .faq-answer'); if (initialActiveAnswer) { initialActiveAnswer.style.maxHeight = initialActiveAnswer.scrollHeight + "px"; }
         }
+        if (submitContactBtn && contactForm) {
+            submitContactBtn.addEventListener('click', () => {
+                const name = document.getElementById('contact-name').value.trim(); const email = document.getElementById('contact-email').value.trim(); const subject = document.getElementById('contact-subject').value.trim(); const message = document.getElementById('contact-message').value.trim();
+                if (!name || !email || !subject) { alert('Please fill in Name, Email, and Subject fields.'); return; }
+                let whatsappMessage = `*New Contact Request from TPA Website*:\n\n*Name:* ${name}\n*Email:* ${email}\n*Subject:* ${subject}\n`; if (message) { whatsappMessage += `*Message:* ${message}\n`; }
+                const encodedMessage = encodeURIComponent(whatsappMessage); const whatsappNumber = "94777349654"; const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`; window.open(whatsappUrl, '_blank');
+            });
+        }
+
+        // --- Initial Page Load ---
         updateCartCountBadge();
         updateWishlistCountBadge();
-    });
+        renderCartModal(); // Pre-render cart modal structure
 
-    // Orders Modal Load Function 
-    const loadUserOrders = async () => { /* ... (index.html eke code eka methana - wenasak na) ... */ }; 
-    if(trackingIconBtn) trackingIconBtn.addEventListener('click', (e) => { e.preventDefault(); if(trackingModal) trackingModal.classList.remove('hidden'); loadUserOrders(); }); 
-    if(closeTrackingBtn) closeTrackingBtn.addEventListener('click', () => { if(trackingModal) trackingModal.classList.add('hidden'); }); 
-    if(footerOrdersLink) { footerOrdersLink.addEventListener('click', (e) => { e.preventDefault(); if(trackingModal) trackingModal.classList.remove('hidden'); loadUserOrders(); }); }
-
-
-    // --- Contact Page Specific Logic ---
-
-    // FAQ Accordion
-    if (faqAccordion) {
-        faqAccordion.addEventListener('click', (e) => {
-            const questionButton = e.target.closest('.faq-question');
-            if (!questionButton) return;
-
-            const faqItem = questionButton.parentElement;
-            const answerDiv = faqItem.querySelector('.faq-answer');
-            const isActive = questionButton.classList.contains('active');
-
-            faqAccordion.querySelectorAll('.faq-item').forEach(item => {
-                const qButton = item.querySelector('.faq-question');
-                const aDiv = item.querySelector('.faq-answer');
-                if (item !== faqItem && qButton.classList.contains('active')) {
-                    qButton.classList.remove('active');
-                    aDiv.style.maxHeight = null;
-                }
-            });
-
-            questionButton.classList.toggle('active');
-            answerDiv.style.maxHeight = questionButton.classList.contains('active') ? answerDiv.scrollHeight + "px" : null;
-        });
-        
-        const initialActiveAnswer = faqAccordion.querySelector('.faq-question.active + .faq-answer');
-        if (initialActiveAnswer) {
-            initialActiveAnswer.style.maxHeight = initialActiveAnswer.scrollHeight + "px";
-        }
-    }
-
-    // Contact Form to WhatsApp
-    if (submitContactBtn && contactForm) {
-        submitContactBtn.addEventListener('click', () => {
-            const name = document.getElementById('contact-name').value.trim();
-            const email = document.getElementById('contact-email').value.trim();
-            const subject = document.getElementById('contact-subject').value.trim();
-            const message = document.getElementById('contact-message').value.trim();
-
-            if (!name || !email || !subject) {
-                alert('Please fill in Name, Email, and Subject fields.');
-                return;
-            }
-
-            let whatsappMessage = `*New Contact Request from TPA Website*:\n\n`;
-            whatsappMessage += `*Name:* ${name}\n`;
-            whatsappMessage += `*Email:* ${email}\n`;
-            whatsappMessage += `*Subject:* ${subject}\n`;
-            if (message) {
-                whatsappMessage += `*Message:* ${message}\n`;
-            }
-
-            const encodedMessage = encodeURIComponent(whatsappMessage);
-            const whatsappNumber = "94777349654"; 
-            const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-            window.open(whatsappUrl, '_blank');
-        });
-    }
-
-    // Initial Badge Updates
-    updateCartCountBadge();
-    updateWishlistCountBadge();
-
-</script>
+    </script>
 
 </body>
-</html>   
+</html>
