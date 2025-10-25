@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TPA - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-link.active { background-color: #eab308; color: #1f2937; font-weight: 600; } /* Amber */
+        .sidebar-link { transition: background-color 0.2s, color 0.2s; }
+        .stat-card { border-left: 4px solid #eab308; } /* Amber */
+        .loader-sm { border: 2px solid #f3f3f3; border-top: 2px solid #eab308; border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; } /* Amber */
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .modal-body-scroll { max-height: 70vh; overflow-y: auto; }
+        .tag-item { background-color: #374151; padding: 4px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; margin: 2px; }
+        .tag-item button { color: #fca5a5; font-weight: bold; background: none; border: none; cursor: pointer; padding: 0 2px; }
+        .tag-item button:hover { color: #f87171; }
+        input[type="text"], input[type="number"], input[type="email"], input[type="password"], input[type="tel"], input[type="url"], select, textarea {
+            width: 100%; padding: 0.5rem; border: 1px solid #475569; background-color: #334155; color: #f1f5f9; border-radius: 0.375rem;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none; box-shadow: 0 0 0 2px #eab308; border-color: #eab308; /* Amber */
+        }
+        button[type="submit"], button.form-action-btn {
+             padding: 0.5rem 1rem; border-radius: 0.375rem; color: #1f2937; background-color: #eab308; font-weight: 600; /* Amber */
+        }
+         button[type="submit"]:hover, button.form-action-btn:hover { background-color: #d97706; } /* Darker Amber */
+         button[type="button"].cancel-btn {
+             padding: 0.5rem 1.5rem; border-radius: 0.375rem; color: #cbd5e1; background-color: #475569;
+         }
+          button[type="button"].cancel-btn:hover { background-color: #64748b; }
+        select.product-status-select {
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            padding-right: 1.5rem;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23CBD5E1%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.8-9.3-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 0.65em auto;
+        }
+        .product-status-select option {
+            background: #334155;
+            color: white;
+        }
+        .product-status-select.in-stock {
+            background-color: #15803d !important;
+            border-color: #16a34a !important;
+            color: white !important;
+        }
+        .product-status-select.out-of-stock {
+            background-color: #b91c1c !important;
+            border-color: #dc2626 !important;
+            color: white !important;
+        }
+        .product-status-select:disabled { opacity: 0.7; }
+        .offer-product-checkbox {
+             border-radius: 0.25rem; background-color: #1e293b; border-color: #475569; color: #eab308; transition: all 0.2s; /* Amber */
+        }
+        .offer-product-checkbox:focus { ring: 2px; ring-color: #eab308; ring-offset: 0; } /* Amber */
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200">
+
+    <div class="flex h-screen">
+        <aside class="w-64 bg-slate-800 text-slate-300 flex flex-col fixed h-full">
+            <div class="p-5 text-2xl font-bold border-b border-slate-700 text-white flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 20 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                TPA - Admin Panel
+            </div>
+            <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <a href="#" class="sidebar-link active flex items-center py-2.5 px-4 rounded-lg" data-view="dashboard">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                    Dashboard
+                </a>
+                <a href="#" class="sidebar-link flex items-center py-2.5 px-4 rounded-lg hover:bg-slate-700" data-view="products">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14v6m-3-3h6M6 10h2a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2zm10 0h2a2 2 0 002-2V6a2 2 0 00-2-2h-2a2 2 0 00-2 2v2a2 2 0 002 2zM6 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H6a2 2 0 00-2 2v2a2 2 0 002 2z"></path></svg>
+                    Manage Products
+                </a>
+                 <a href="#" class="sidebar-link flex items-center py-2.5 px-4 rounded-lg hover:bg-slate-700" data-view="orders">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    Orders
+                </a>
+                <a href="#" class="sidebar-link flex items-center py-2.5 px-4 rounded-lg hover:bg-slate-700" data-view="offers">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-5 5a2 2 0 01-2.828 0l-7-7A2 2 0 013 8V5a2 2 0 012-2z"></path></svg>
+                    Homepage Banners
+                </a>
+                <a href="#" class="sidebar-link flex items-center py-2.5 px-4 rounded-lg hover:bg-slate-700" data-view="users">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197M15 21a6 6 0 006-6v-1a6 6 0 00-9-5.197M12 12a4 4 0 110-8 4 4 0 010 8z"></path></svg>
+                    Users
+                </a>
+                 <div class="pt-2 mt-2 border-t border-slate-700">
+                      <a href="#" class="sidebar-link flex items-center py-2.5 px-4 rounded-lg hover:bg-slate-700" data-view="categories">
+                           <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2h2"></path></svg>
+                           Categories
+                       </a>
+                 </div>
+            </nav>
+            <div class="p-4 mt-auto border-t border-slate-700">
+                <button id="logout-btn" class="w-full text-left flex items-center py-2.5 px-4 rounded-lg text-red-400 hover:bg-red-500 hover:text-white">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="ml-64 flex-1 p-8 overflow-y-auto">
+            <div id="dashboard-view" class="view-content">
+                <h1 class="text-3xl font-bold text-slate-100 mb-6">Dashboard</h1>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="stat-card bg-slate-800 p-6 rounded-lg shadow-lg"><h3 class="text-slate-400">Total Products</h3><p id="product-count" class="text-3xl font-bold mt-2 text-white">0</p></div>
+                    <div class="stat-card bg-slate-800 p-6 rounded-lg shadow-lg"><h3 class="text-slate-400">Total Categories</h3><p id="category-count" class="text-3xl font-bold mt-2 text-white">0</p></div>
+                    <div class="stat-card bg-slate-800 p-6 rounded-lg shadow-lg"><h3 class="text-slate-400">Total Brands</h3><p id="brand-count" class="text-3xl font-bold mt-2 text-white">N/A</p></div>
+                </div>
+            </div>
+
+            <div id="products-view" class="view-content hidden">
+                 <div class="flex justify-between items-center mb-6">
+                     <h1 class="text-3xl font-bold text-slate-100">Manage Products</h1>
+                     <button id="show-add-modal-btn" class="flex items-center bg-amber-600 hover:bg-amber-700 text-black font-semibold py-2 px-4 rounded-lg shadow-md">
+                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                         Add New Product
+                     </button>
+                 </div>
+                 <div class="bg-slate-800 p-4 rounded-lg shadow-lg mb-6">
+                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                         <input type="text" id="filter-search" placeholder="Search by name or brand..." class="md:col-span-1">
+                         <select id="filter-category"><option value="">All Categories</option></select>
+                         <select id="filter-brand"><option value="">All Brands</option></select>
+                     </div>
+                 </div>
+                 <div class="bg-slate-800 rounded-lg shadow-lg overflow-hidden">
+                     <div class="overflow-x-auto">
+                         <table class="w-full text-left">
+                             <thead class="bg-slate-700"><tr><th class="p-3">Photo</th><th class="p-3">Name</th><th class="p-3">Category</th><th class="p-3">Brand</th><th class="p-3">Price</th><th class="p-3">Status</th><th class="p-3">Actions</th></tr></thead>
+                             <tbody id="product-list-body" class="divide-y divide-slate-700"><tr><td colspan="7" class="p-4 text-center text-slate-400">Loading...</td></tr></tbody>
+                         </table>
+                     </div>
+                 </div>
+            </div>
+
+            <div id="orders-view" class="view-content hidden">
+                 <h1 class="text-3xl font-bold text-slate-100 mb-6">Manage Orders</h1>
+                 <div class="bg-slate-800 rounded-lg shadow-lg overflow-hidden">
+                     <div class="overflow-x-auto">
+                         <table class="w-full text-left">
+                             <thead class="bg-slate-700">
+                                 <tr>
+                                     <th>Order ID</th>
+                                     <th>Customer</th>
+                                     <th>Date</th>
+                                     <th>Total (LKR)</th>
+                                     <th>Status</th>
+                                     <th class="p-3">WhatsApp</th> <th class="p-3">Call</th> <th>Actions</th>
+                                 </tr>
+                             </thead>
+                             <tbody id="orders-list-body" class="divide-y divide-slate-700">
+                                 <tr><td colspan="8" class="text-center p-4">Loading...</td></tr>
+                             </tbody>
+                         </table>
+                     </div>
+                 </div>
+            </div>
+            <div id="offers-view" class="view-content hidden">
+                <h1 class="text-3xl font-bold text-slate-100 mb-6">Manage Homepage Banners & Offers</h1>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 bg-slate-800 p-6 rounded-xl shadow-lg h-fit">
+                        <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">Add New Banner/Offer</h2>
+                        <form id="add-offer-form" class="space-y-4">
+                            <div>
+                                <label for="offer-name" class="block text-sm font-medium text-slate-300 mb-1">Offer Name</label>
+                                <input type="text" id="offer-name" placeholder="e.g., 'Weekend Sale'" required>
+                            </div>
+
+                            <div>
+                                <label for="offer-banner-url" class="block text-sm font-medium text-slate-300 mb-1">Homepage Banner URL (Optional)</label>
+                                <input type="url" id="offer-banner-url" placeholder="https://.../my-promo-banner.jpg">
+                                <p class="text-xs text-slate-400 mt-1">Homepage එකේ පෙන්නන්න banner image URL එක මෙතන දාන්න.</p>
+                            </div>
+                            
+                            <div>
+                                <label for="offer-display-order" class="block text-sm font-medium text-slate-300 mb-1">Display Order (පිළිවෙල)</label>
+                                <input type="number" id="offer-display-order" value="10" placeholder="e.g., 10, 20, 30" required>
+                                <p class="text-xs text-slate-400 mt-1">Homepage එකේ පේන පිළිවෙල. <strong>අඩුම අංකය මුලินම</strong> පෙන්වයි.</p>
+                            </div>
+                            <div>
+                                <label for="offer-percentage" class="block text-sm font-medium text-slate-300 mb-1">Discount Percentage (%)</label>
+                                <input type="number" id="offer-percentage" placeholder="e.g., 15">
+                            </div>
+                            <div>
+                                <label for="offer-price" class="block text-sm font-medium text-slate-300 mb-1">Special Discount Price (LKR)</label>
+                                <input type="number" id="offer-price" placeholder="e.g., 49990">
+                            </div>
+                            <p class="text-xs text-slate-400">Hint: Enter a percentage *or* a special price. If both are entered, the special price takes priority.</p>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-300 mb-2">Apply to Products</label>
+                                <div id="offer-products-list" class="max-h-60 overflow-y-auto space-y-2 p-3 bg-slate-700 rounded-md border border-slate-600">
+                                    <p class="text-slate-400 text-sm">Loading products...</p>
+                                </div>
+                            </div>
+                            <button type="submit" id="add-offer-btn" class="form-action-btn w-full">Add Banner / Offer</button>
+                            <p id="offer-form-message" class="text-sm font-medium text-center pt-2"></p>
+                        </form>
+                    </div>
+                    <div class="lg:col-span-2 bg-slate-800 p-6 rounded-xl shadow-lg">
+                        <h2 class="text-xl font-bold text-white mb-4 border-b border-slate-700 pb-2">Existing Banners / Offers</h2>
+                        <div id="existing-offers-container" class="space-y-4">
+                            <p class="text-slate-400">No offers created yet.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="users-view" class="view-content hidden">
+                 <h1 class="text-3xl font-bold text-slate-100 mb-6">Manage Users</h1>
+                 <div class="bg-slate-800 p-6 rounded-lg shadow-lg overflow-x-auto">
+                     <table class="w-full text-left text-slate-200">
+                         <thead class="bg-slate-700"><tr><th>Name</th><th>Email</th><th>Phone</th><th>Address</th><th>City</th><th>District</th><th>Postal Code</th><th>Registered On</th></tr></thead>
+                         <tbody id="users-table-body" class="text-sm divide-y divide-slate-700"></tbody>
+                     </table>
+                 </div>
+            </div>
+
+            <div id="categories-view" class="view-content hidden">
+                 <h1 class="text-3xl font-bold text-slate-100 mb-6">Manage Categories</h1>
+                 <div class="bg-slate-800 p-8 rounded-xl shadow-lg">
+                     <form id="add-category-form" class="space-y-4 mb-6">
+                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                             <input type="text" id="category-name" placeholder="New Category Name" required class="md:col-span-1">
+                             
+                             <div class="md:col-span-2">
+                                 <label for="category-banner-file" class="block text-sm font-medium text-slate-300 mb-1">Banner Image (Optional)</label>
+                                 <input type="file" id="category-banner-file" accept="image/*" class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200">
+                                 <input type="hidden" id="category-banner-url">
+                                 <img id="category-image-preview" src="" alt="Image Preview" class="hidden w-32 h-32 object-cover rounded-lg mt-3 border border-slate-600">
+                             </div>
+                         </div>
+                         <button type="submit" class="form-action-btn w-full md:w-auto">Add Category</button>
+                     </form>
+                     <h3 class="text-xl font-semibold mb-3 text-white border-b border-slate-700 pb-2">Existing Categories</h3>
+                     <ul id="category-list" class="space-y-3"></ul>
+                 </div>
+            </div>
+            </main>
+    </div>
+
+        <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-800 rounded-xl shadow-lg w-full max-w-2xl">
+            <div class="flex justify-between items-center p-5 border-b border-slate-700">
+                <h2 id="modal-title" class="text-xl font-bold text-white">Add New Product</h2>
+                <button id="close-modal-btn" class="text-slate-400 hover:text-white text-3xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 modal-body-scroll">
+                <form id="add-product-form" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="text" id="name" placeholder="Product Name" required class="md:col-span-2">
+                        <input type="number" id="price" placeholder="Price (LKR)" required>
+                        <select id="category" required><option value="" disabled selected>Select Category First</option></select>
+                        <select id="brand" required><option value="" disabled selected>Select Category to load Brands</option></select>
+                        <select id="stockStatus" required>
+                            <option value="In Stock" selected>In Stock</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                        </select>
+                    </div>
+                    <textarea id="description" rows="3" placeholder="Description" required></textarea>
+                    <div id="dynamic-specs-container" class="space-y-3 pt-4 border-t border-slate-700 hidden">
+                        <h3 class="text-lg font-semibold text-white mb-1">Specifications</h3>
+                    </div>
+                    <input type="file" id="image" accept="image/*" class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200">
+                    <div class="text-right space-x-2 pt-4">
+                       <button type="button" id="cancel-edit-btn" class="cancel-btn hidden">Cancel</button>
+                       <button type="submit" id="submit-btn" class="form-action-btn">Add Product</button>
+                    </div>
+                     <p id="form-message" class="text-sm font-medium text-center pt-2"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div id="order-details-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+       <div class="bg-slate-800 rounded-xl shadow-lg w-full max-w-2xl">
+            <div class="flex justify-between items-center p-5 border-b border-slate-700">
+                <h2 id="order-modal-title" class="text-xl font-bold text-white">Order Details</h2>
+                <button id="close-order-modal-btn" class="text-slate-400 hover:text-white text-3xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 modal-body-scroll space-y-4">
+                <div><h3 class="text-lg font-semibold text-white mb-2">Customer Details</h3><div class="text-slate-300 space-y-1 text-sm"><p><strong>Name:</strong> <span id="order-customer-name"></span></p><p><strong>Email:</strong> <span id="order-customer-email"></span></p><p><strong>Phone:</strong> <span id="order-customer-phone"></span></p><p><strong>Address:</strong> <span id="order-customer-address"></span></p></div></div>
+                <div><h3 class="text-lg font-semibold text-white mb-2">Order Items</h3><div class="divide-y divide-slate-700" id="order-items-list"></div><div class="text-right text-xl font-bold text-white mt-3">Total: LKR <span id="order-total-amount"></span></div></div>
+                <div class="pt-4 border-t border-slate-700"><h3 class="text-lg font-semibold text-white mb-2">Update Status</h3><div class="flex flex-col gap-3"><select id="order-status-select"><option value="Pending">Pending</option><option value="Processing">Processing</option><option value="Shipped">Shipped</option><option value="Delivered">Delivered</option><option value="Cancelled">Cancelled</option></select><button id="update-status-btn" class="form-action-btn">Update Status</button></div><p id="order-form-message" class="text-sm font-medium text-center pt-2"></p></div>
+            </div>
+         </div>
+    </div>
+    <div id="brand-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-800 rounded-xl shadow-lg w-full max-w-lg">
+            <div class="flex justify-between items-center p-5 border-b border-slate-700">
+                <h2 id="brand-modal-title" class="text-xl font-bold text-white">Manage Brands for Category</h2>
+                <button id="close-brand-modal-btn" class="text-slate-400 hover:text-white text-3xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 modal-body-scroll">
+                <form id="add-brand-to-category-form" class="flex flex-col sm:flex-row gap-3 mb-4">
+                    <input type="text" id="brand-in-category-name" placeholder="New Brand Name" required class="flex-grow">
+                    <button type="submit" class="form-action-btn flex-shrink-0">Add Brand to Category</button>
+                </form>
+                <p id="brand-modal-error" class="text-red-400 text-sm mb-4 h-4"></p>
+                <h3 class="font-semibold mb-2 text-white border-b border-slate-700 pb-1">Current Brands:</h3>
+                <div id="current-brands-list" class="flex flex-wrap gap-2 min-h-[40px]">
+                    <p class="text-slate-400 text-sm w-full">No brands added to this category yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="spec-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-slate-800 rounded-xl shadow-lg w-full max-w-lg">
+            <div class="flex justify-between items-center p-5 border-b border-slate-700">
+                <h2 id="spec-modal-title" class="text-xl font-bold text-white">Manage Specification Fields</h2>
+                <button id="close-spec-modal-btn" class="text-slate-400 hover:text-white text-3xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 modal-body-scroll">
+                <p class="mb-4 text-slate-300 text-sm">Add or remove specification fields for the <strong id="spec-modal-category-name" class="text-white"></strong> category.</p>
+                <form id="add-spec-field-form" class="flex flex-col sm:flex-row gap-3 mb-4">
+                    <input type="text" id="spec-field-name-input" placeholder="New Field Name (e.g., Screen Size)" required class="flex-grow">
+                    <button type="submit" class="form-action-btn flex-shrink-0">Add Field</button>
+                </form>
+                <p id="spec-modal-error" class="text-red-400 text-sm mb-4 h-4"></p>
+                <h3 class="font-semibold mb-2 text-white border-b border-slate-700 pb-1">Current Fields:</h3>
+                <div id="current-spec-fields-list" class="flex flex-wrap gap-2 min-h-[40px]">
+                    <p class="text-slate-400 text-sm w-full">No specific fields added yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+  <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, query, orderBy, updateDoc, where, arrayUnion, arrayRemove, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAtvnbedBpCiRe_ZyfoB-TacrboEMgft5Y", authDomain: "mobile-shop-1c315.firebaseapp.com", projectId: "mobile-shop-1c315", storageBucket: "mobile-shop-1c315.firebasestorage.app", messagingSenderId: "689278786227", appId: "1:689278786227:web:ee06565e4a230381bf6ec6", measurementId: "G-MLDEWBBEMV"
+         };
+        const imgbbApiKey = "d4fe850d2ff4d9588fd827d501383ed5";
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const productsCol = collection(db, 'products');
+        const categoriesCol = collection(db, 'categories');
+        const usersCol = collection(db, 'users');
+        const ordersCol = collection(db, 'orders');
+        const offersCol = collection(db, 'offers');
+
+        let allProductsMaster = new Map();
+        let filteredProducts = new Map();
+        let allOrders = new Map();
+        let allCategories = new Map();
+        let allOffers = new Map();
+
+        onAuthStateChanged(auth, user => { if (!user) window.location.href = './login.html'; });
+
+        const links = document.querySelectorAll('.sidebar-link');
+        const views = document.querySelectorAll('.view-content');
+        links.forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                links.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                const targetView = link.dataset.view;
+                views.forEach(view => {
+                    view.id === `${targetView}-view` ? view.classList.remove('hidden') : view.classList.add('hidden');
+                });
+            });
+        });
+
+        onSnapshot(productsCol, snap => document.getElementById('product-count').textContent = snap.size);
+        onSnapshot(categoriesCol, snap => document.getElementById('category-count').textContent = snap.size);
+        
+        onSnapshot(categoriesCol, (snapshot) => {
+            let brandSet = new Set();
+            snapshot.forEach(doc => {
+                const category = doc.data();
+                if (category.brands && Array.isArray(category.brands)) {
+                    category.brands.forEach(brand => brandSet.add(brand));
+                }
+            });
+            document.getElementById('brand-count').textContent = brandSet.size;
+        });
+
+
+        onSnapshot(query(productsCol, orderBy("name")), (snapshot) => {
+            allProductsMaster.clear();
+            snapshot.forEach(doc => { allProductsMaster.set(doc.id, { id: doc.id, ...doc.data() }); });
+            renderOfferProductList();
+            renderExistingOffers();
+        }, err => { console.error("Error fetching master product list: ", err); });
+
+        
+        const categoryListContainer = document.getElementById('category-list'); // <-- 1. MEKA HADA ETHA (FIXED)
+        const addCategoryForm = document.getElementById('add-category-form');
+        const categoryNameInput = document.getElementById('category-name');
+        // Parana URL input eka ain kara
+        // Aluth element select kara
+        const categoryBannerFileInput = document.getElementById('category-banner-file');
+        const categoryBannerUrlHidden = document.getElementById('category-banner-url'); // Me ID eka hidden input ekata yomu kala
+        const categoryImagePreview = document.getElementById('category-image-preview');
+
+        const brandModal = document.getElementById('brand-modal');
+        const closeBrandModalBtn = document.getElementById('close-brand-modal-btn');
+        const brandModalTitle = document.getElementById('brand-modal-title');
+        const addBrandToCategoryForm = document.getElementById('add-brand-to-category-form');
+        const brandInCategoryNameInput = document.getElementById('brand-in-category-name');
+        const currentBrandsList = document.getElementById('current-brands-list');
+        const brandModalError = document.getElementById('brand-modal-error');
+        const specModal = document.getElementById('spec-modal');
+        const closeSpecModalBtn = document.getElementById('close-spec-modal-btn');
+        const specModalTitle = document.getElementById('spec-modal-title');
+        const specModalCategoryName = document.getElementById('spec-modal-category-name');
+        const addSpecFieldForm = document.getElementById('add-spec-field-form');
+        const specFieldNameInput = document.getElementById('spec-field-name-input');
+        const currentSpecFieldsList = document.getElementById('current-spec-fields-list');
+        const specModalError = document.getElementById('spec-modal-error');
+        let currentManagingCategoryId = null;
+
+        // Aluthin add karapu image preview function eka
+        if (categoryBannerFileInput) {
+            categoryBannerFileInput.addEventListener('change', () => {
+                const file = categoryBannerFileInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        categoryImagePreview.src = e.target.result;
+                        categoryImagePreview.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    categoryImagePreview.src = '';
+                    categoryImagePreview.classList.add('hidden');
+                }
+            });
+        }
+
+        // Add Category Form eke submit listener eka sampoornayenma aluthin haduwa
+        if (addCategoryForm) {
+            addCategoryForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const addCategoryBtn = addCategoryForm.querySelector('button[type="submit"]');
+                const name = categoryNameInput.value.trim();
+                const file = categoryBannerFileInput.files[0];
+                let bannerUrl = ''; // imgBB URL eka save karaganna
+
+                if (!name) {
+                    alert('Please enter a category name.');
+                    return;
+                }
+                
+                addCategoryBtn.disabled = true;
+                addCategoryBtn.textContent = 'Saving...';
+
+                try {
+                    // 1. File ekak thiyenawanam upload karanna
+                    if (file) {
+                        addCategoryBtn.textContent = 'Uploading Image...';
+                        const formData = new FormData();
+                        formData.append('image', file);
+                        
+                        // imgbbApiKey variable eka use karala upload karanawa
+                        const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
+                            method: 'POST',
+                            body: formData,
+                        });
+                        
+                        const imgbbData = await response.json();
+                        if (imgbbData.success) {
+                            bannerUrl = imgbbData.data.url; // URL eka gannawa
+                        } else {
+                            throw new Error('Image upload failed: ' + (imgbbData.error?.message || 'Unknown error')); // <-- 2. MEKA HADA ETHA (FIXED)
+                        }
+                    }
+                    
+                    addCategoryBtn.textContent = 'Saving Category...';
+                    
+                    // 2. Firestore ekata data prepare karanna
+                    const categoryData = { 
+                        name: name, 
+                        brands: [], 
+                        specFields: [], 
+                        createdAt: new Date() 
+                    };
+                    
+                    if (bannerUrl) { // Upload unoth witharak URL eka add karanna
+                        categoryData.bannerImageUrl = bannerUrl; 
+                    }
+                    
+                    // 3. Firestore ekata save karanna
+                    await addDoc(categoriesCol, categoryData);
+                    
+                    // 4. Form eka reset karanna
+                    addCategoryForm.reset();
+                    categoryImagePreview.src = '';
+                    categoryImagePreview.classList.add('hidden');
+                    
+                } catch (error) { 
+                    console.error("Error adding category:", error); 
+                    alert("Failed to add category: " + error.message); 
+                } finally {
+                    // 5. Button eka ayeth enable karanna
+                    addCategoryBtn.disabled = false;
+                    addCategoryBtn.textContent = 'Add Category';
+                }
+            });
+        }
+        
+        const renderCategoryList = () => {
+            if (!categoryListContainer) return;
+            const sortedCategories = [...allCategories.entries()].sort((a, b) => a[1].name.localeCompare(b[1].name));
+            if (sortedCategories.length === 0) { categoryListContainer.innerHTML = '<li class="text-slate-400">No categories found.</li>'; return; }
+            categoryListContainer.innerHTML = sortedCategories.map(([id, category]) => {
+                const brandCount = category.brands?.length || 0;
+                const specCount = category.specFields?.length || 0;
+                const hasBanner = !!category.bannerImageUrl;
+                return `
+                    <li class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-700 p-3 rounded gap-2">
+                        <div class="flex-1 flex items-center gap-2">
+                            <span class="font-medium text-white">${category.name}</span>
+                            ${hasBanner ? '<i class="fas fa-image text-green-400 text-xs" title="Banner Image Added"></i>' : '<i class="fas fa-image text-slate-500 text-xs" title="No Banner Image"></i>'}
+                            <span class="text-xs text-slate-400 ml-1">(${brandCount} brands, ${specCount} specs)</span>
+                        </div>
+                        <div class="flex gap-2 flex-shrink-0 mt-2 sm:mt-0">
+                            <button data-id="${id}" class="manage-specs-btn text-green-400 hover:text-green-300 text-xs font-semibold bg-slate-600 px-2 py-1 rounded hover:bg-slate-500">Manage Specs</button>
+                            <button data-id="${id}" class="manage-brands-btn text-blue-400 hover:text-blue-300 text-xs font-semibold bg-slate-600 px-2 py-1 rounded hover:bg-slate-500">Manage Brands</button>
+                            <button data-id="${id}" class="delete-category-btn text-red-400 hover:text-red-300 text-xs font-semibold bg-slate-600 px-2 py-1 rounded hover:bg-slate-500">DELETE</button>
+                        </div>
+                    </li>`;
+            }).join('');
+        };
+
+        onSnapshot(query(categoriesCol, orderBy("name")), (snapshot) => {
+            const productCategoryDropdown = document.getElementById('category');
+            const filterCategoryDropdown = document.getElementById('filter-category');
+            allCategories.clear();
+            let productDropdownHTML = `<option value="" disabled selected>Select Category First</option>`;
+            let filterDropdownHTML = `<option value="">All Categories</option>`;
+            let allBrandOptionsForFilter = new Set();
+            snapshot.forEach(doc => {
+                const category = { id: doc.id, ...doc.data() };
+                allCategories.set(doc.id, category);
+                productDropdownHTML += `<option value="${category.name}">${category.name}</option>`;
+                filterDropdownHTML += `<option value="${category.name}">${category.name}</option>`;
+                if(category.brands) { category.brands.forEach(brand => allBrandOptionsForFilter.add(brand)); }
+            });
+            if (productCategoryDropdown) productCategoryDropdown.innerHTML = productDropdownHTML;
+            if (filterCategoryDropdown) filterCategoryDropdown.innerHTML = filterDropdownHTML;
+            const filterBrandDropdown = document.getElementById('filter-brand');
+            if (filterBrandDropdown) {
+                 let filterBrandHTML = `<option value="">All Brands</option>`;
+                 [...allBrandOptionsForFilter].sort().forEach(brand => { filterBrandHTML += `<option value="${brand}">${brand}</option>`; });
+                 filterBrandDropdown.innerHTML = filterBrandHTML;
+            }
+            renderCategoryList();
+            if (currentManagingCategoryId) { 
+                const updatedCategory = allCategories.get(currentManagingCategoryId);
+                if (updatedCategory) {
+                    if (!brandModal.classList.contains('hidden')) {
+                        renderCurrentBrands(updatedCategory.brands || []);
+                    }
+                    if (!specModal.classList.contains('hidden')) {
+                        renderCurrentSpecFields(updatedCategory.specFields || []);
+                    }
+                } else {
+                    brandModal.classList.add('hidden');
+                    specModal.classList.add('hidden');
+                    currentManagingCategoryId = null;
+                }
+            } 
+        }, error => { console.error("Error fetching categories:", error); });
+
+        if (categoryListContainer) {
+            categoryListContainer.addEventListener('click', async (e) => {
+                const deleteBtn = e.target.closest('.delete-category-btn');
+                const manageBrandsBtn = e.target.closest('.manage-brands-btn');
+                const manageSpecsBtn = e.target.closest('.manage-specs-btn');
+                
+                if (deleteBtn) { 
+                    const id = deleteBtn.dataset.id;
+                    const category = allCategories.get(id);
+                    if (confirm(`Are you sure you want to delete the category "${category.name}"? This cannot be undone.`)) {
+                        try {
+                            await deleteDoc(doc(db, "categories", id));
+                        } catch (error) {
+                            console.error("Error deleting category: ", error);
+                            alert("Failed to delete category.");
+                        }
+                    }
+                } 
+                else if (manageBrandsBtn) { 
+                    const id = manageBrandsBtn.dataset.id;
+                    const category = allCategories.get(id);
+                    if (category) {
+                        openBrandModal(category);
+                    }
+                } 
+                else if (manageSpecsBtn) { 
+                    const id = manageSpecsBtn.dataset.id;
+                    const category = allCategories.get(id);
+                    if (category) {
+                        openSpecModal(category);
+                    }
+                }
+            });
+        }
+
+        const openBrandModal = (category) => {
+            currentManagingCategoryId = category.id;
+            brandModalTitle.textContent = `Manage Brands for "${category.name}"`;
+            renderCurrentBrands(category.brands || []);
+            brandModalError.textContent = '';
+            addBrandToCategoryForm.reset();
+            brandModal.classList.remove('hidden');
+        };
+        closeBrandModalBtn.addEventListener('click', () => {
+            brandModal.classList.add('hidden');
+            currentManagingCategoryId = null;
+        });
+        const renderCurrentBrands = (brands) => {
+            if (brands.length === 0) {
+                currentBrandsList.innerHTML = '<p class="text-slate-400 text-sm w-full">No brands added to this category yet.</p>';
+                return;
+            }
+            currentBrandsList.innerHTML = brands.sort().map(brand => `
+                <span class="tag-item">
+                    ${brand}
+                    <button data-brand="${brand}" class="remove-brand-from-category-btn" title="Remove Brand">&times;</button>
+                </span>
+            `).join('');
+        };
+        addBrandToCategoryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const brandName = brandInCategoryNameInput.value.trim();
+            if (brandName && currentManagingCategoryId) {
+                try {
+                    brandModalError.textContent = '';
+                    const categoryRef = doc(db, "categories", currentManagingCategoryId);
+                    await updateDoc(categoryRef, {
+                        brands: arrayUnion(brandName)
+                    });
+                    addBrandToCategoryForm.reset();
+                } catch (error) {
+                    console.error("Error adding brand: ", error);
+                    brandModalError.textContent = "Failed to add brand.";
+                }
+            }
+        });
+        currentBrandsList.addEventListener('click', async (e) => {
+            const removeBtn = e.target.closest('.remove-brand-from-category-btn');
+            if (removeBtn && currentManagingCategoryId) {
+                const brandName = removeBtn.dataset.brand;
+                if (confirm(`Are you sure you want to remove "${brandName}" from this category?`)) {
+                    try {
+                        brandModalError.textContent = '';
+                        const categoryRef = doc(db, "categories", currentManagingCategoryId);
+                        await updateDoc(categoryRef, {
+                            brands: arrayRemove(brandName)
+                        });
+                    } catch (error) {
+                        console.error("Error removing brand: ", error);
+                        brandModalError.textContent = "Failed to remove brand.";
+                    }
+                }
+            }
+        });
+
+        const openSpecModal = (category) => {
+            currentManagingCategoryId = category.id;
+            specModalTitle.textContent = `Manage Specs for "${category.name}"`;
+            specModalCategoryName.textContent = category.name;
+            renderCurrentSpecFields(category.specFields || []);
+            specModalError.textContent = '';
+            addSpecFieldForm.reset();
+            specModal.classList.remove('hidden');
+        };
+        closeSpecModalBtn.addEventListener('click', () => {
+            specModal.classList.add('hidden');
+            currentManagingCategoryId = null;
+        });
+        const renderCurrentSpecFields = (fields) => {
+            if (fields.length === 0) {
+                currentSpecFieldsList.innerHTML = '<p class="text-slate-400 text-sm w-full">No specific fields added yet.</p>';
+                return;
+            }
+            currentSpecFieldsList.innerHTML = fields.sort().map(field => `
+                <span class="tag-item">
+                    ${field}
+                    <button data-field="${field}" class="remove-spec-field-btn" title="Remove Field">&times;</button>
+                </span>
+            `).join('');
+        };
+        addSpecFieldForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fieldName = specFieldNameInput.value.trim();
+            if (fieldName && currentManagingCategoryId) {
+                try {
+                    specModalError.textContent = '';
+                    const categoryRef = doc(db, "categories", currentManagingCategoryId);
+                    await updateDoc(categoryRef, {
+                        specFields: arrayUnion(fieldName)
+                    });
+                    addSpecFieldForm.reset();
+                } catch (error) {
+                    console.error("Error adding spec field: ", error);
+                    specModalError.textContent = "Failed to add field.";
+                }
+            }
+        });
+        currentSpecFieldsList.addEventListener('click', async (e) => {
+            const removeBtn = e.target.closest('.remove-spec-field-btn');
+            if (removeBtn && currentManagingCategoryId) {
+                const fieldName = removeBtn.dataset.field;
+                if (confirm(`Are you sure you want to remove "${fieldName}" from this category's specs?`)) {
+                    try {
+                        specModalError.textContent = '';
+                        const categoryRef = doc(db, "categories", currentManagingCategoryId);
+                        await updateDoc(categoryRef, {
+                            specFields: arrayRemove(fieldName)
+                        });
+                    } catch (error) {
+                        console.error("Error removing spec field: ", error);
+                        specModalError.textContent = "Failed to remove field.";
+                    }
+                }
+            }
+        });
+
+        const productModal = document.getElementById('product-modal');
+        const showAddModalBtn = document.getElementById('show-add-modal-btn');
+        const closeModalBtn_product = document.getElementById('close-modal-btn');
+        const addProductForm = document.getElementById('add-product-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const cancelBtn = document.getElementById('cancel-edit-btn');
+        const formMsg = document.getElementById('form-message');
+        const imageInput = document.getElementById('image');
+        const productListBody = document.getElementById('product-list-body');
+        const modalTitle = document.getElementById('modal-title');
+        const productCategoryDropdown = document.getElementById('category');
+        const productBrandDropdown = document.getElementById('brand');
+        const dynamicSpecsContainer = document.getElementById('dynamic-specs-container');
+        const filterSearchInput = document.getElementById('filter-search');
+        const filterCategoryDropdown = document.getElementById('filter-category');
+        const filterBrandDropdown = document.getElementById('filter-brand');
+        let currentEditingProductId = null;
+        let currentEditingImageUrl = null;
+        let currentProductQuery = query(productsCol, orderBy("createdAt", "desc"));
+        let unsubscribeProductListener = null;
+        
+        const createSpecInput = (fieldName, value = '') => {
+            return `
+                <div class="grid grid-cols-3 gap-2 items-center">
+                    <label for="spec-${fieldName.replace(/\s+/g, '-')}" class="col-span-1 text-sm font-medium text-slate-300">${fieldName}</label>
+                    <input type="text" id="spec-${fieldName.replace(/\s+/g, '-')}" data-spec-key="${fieldName}" value="${value}" placeholder="Enter ${fieldName}" class="col-span-2 product-spec-input">
+                </div>
+            `;
+        };
+        
+        productCategoryDropdown.addEventListener('change', (e) => {
+            const selectedCategoryName = e.target.value;
+            let brands = [];
+            let specFields = [];
+            
+            for (const [id, category] of allCategories.entries()) {
+                if (category.name === selectedCategoryName) {
+                    brands = category.brands || [];
+                    specFields = category.specFields || [];
+                    break;
+                }
+            }
+
+            productBrandDropdown.innerHTML = '<option value="" disabled selected>Select Brand</option>' + 
+                brands.sort().map(brand => `<option value="${brand}">${brand}</option>`).join('');
+                
+            populateDynamicSpecFields(null, specFields);
+        });
+        
+        const populateDynamicSpecFields = (productData, specFieldsFromCategory = null) => {
+            let fields = [];
+            let values = {};
+
+            if (productData && productData.specs) {
+                fields = Object.keys(productData.specs);
+                values = productData.specs;
+            } else if (specFieldsFromCategory) {
+                fields = specFieldsFromCategory;
+            }
+
+            if (fields.length > 0) {
+                dynamicSpecsContainer.innerHTML = '<h3 class="text-lg font-semibold text-white mb-1">Specifications</h3>' +
+                    fields.sort().map(field => createSpecInput(field, values[field] || '')).join('');
+                dynamicSpecsContainer.classList.remove('hidden');
+            } else {
+                dynamicSpecsContainer.innerHTML = '<h3 class="text-lg font-semibold text-white mb-1">Specifications</h3>';
+                dynamicSpecsContainer.classList.add('hidden');
+            }
+        };
+        
+        function resetProductForm() {
+            currentEditingProductId = null;
+            currentEditingImageUrl = null;
+            addProductForm.reset();
+            productBrandDropdown.innerHTML = '<option value="" disabled selected>Select Category to load Brands</option>';
+            productCategoryDropdown.value = ""; 
+            dynamicSpecsContainer.innerHTML = '<h3 class="text-lg font-semibold text-white mb-1">Specifications</h3>';
+            dynamicSpecsContainer.classList.add('hidden');
+            modalTitle.textContent = 'Add New Product';
+            submitBtn.textContent = 'Add Product';
+            cancelBtn.classList.add('hidden');
+            formMsg.textContent = '';
+            formMsg.className = 'text-sm font-medium text-center pt-2';
+            submitBtn.disabled = false;
+            productModal.classList.add('hidden');
+        }
+        
+        showAddModalBtn.addEventListener('click', () => {
+            resetProductForm();
+            modalTitle.textContent = 'Add New Product';
+            submitBtn.textContent = 'Add Product';
+            cancelBtn.classList.add('hidden');
+            productModal.classList.remove('hidden');
+        });
+        
+        closeModalBtn_product.addEventListener('click', resetProductForm);
+        cancelBtn.addEventListener('click', resetProductForm);
+        
+        addProductForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+            formMsg.textContent = '';
+            
+            try {
+                const name = document.getElementById('name').value;
+                const price = parseFloat(document.getElementById('price').value);
+                const category = document.getElementById('category').value;
+                const brand = document.getElementById('brand').value;
+                const stockStatus = document.getElementById('stockStatus').value;
+                const description = document.getElementById('description').value;
+                const imageFile = imageInput.files[0];
+                
+                let imageUrl = currentEditingImageUrl; 
+
+                if (imageFile) {
+                    formMsg.textContent = 'Uploading image...';
+                    formMsg.className = 'text-yellow-400 text-sm font-medium text-center pt-2';
+                    const formData = new FormData();
+                    formData.append('image', imageFile);
+                    
+                    const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    
+                    const imgbbData = await response.json();
+                    if (imgbbData.success) {
+                        imageUrl = imgbbData.data.url;
+                    } else {
+                        throw new Error('Image upload failed: ' + (imgbbData.error?.message || 'Unknown error'));
+                    }
+                }
+
+                if (!imageUrl && !currentEditingProductId) {
+                    throw new Error('An image is required for a new product.');
+                }
+                
+                const specInputs = dynamicSpecsContainer.querySelectorAll('.product-spec-input');
+                const specs = {};
+                specInputs.forEach(input => {
+                    const key = input.dataset.specKey;
+                    const value = input.value.trim();
+                    if (key && value) {
+                        specs[key] = value;
+                    }
+                });
+
+                const productData = {
+                    name, price, category, brand, stockStatus, description, imageUrl, specs,
+                    updatedAt: new Date()
+                };
+
+                if (currentEditingProductId) {
+                    formMsg.textContent = 'Updating product...';
+                    formMsg.className = 'text-yellow-400 text-sm font-medium text-center pt-2';
+                    const productRef = doc(db, "products", currentEditingProductId);
+                    await updateDoc(productRef, productData);
+                    formMsg.textContent = 'Product updated successfully!';
+                    formMsg.className = 'text-green-400 text-sm font-medium text-center pt-2';
+                } else {
+                    formMsg.textContent = 'Adding product...';
+                    formMsg.className = 'text-yellow-400 text-sm font-medium text-center pt-2';
+                    productData.createdAt = new Date();
+                    await addDoc(productsCol, productData);
+                    formMsg.textContent = 'Product added successfully!';
+                    formMsg.className = 'text-green-400 text-sm font-medium text-center pt-2';
+                }
+
+                setTimeout(resetProductForm, 1500);
+
+            } catch (error) {
+                console.error("Error saving product: ", error);
+                formMsg.textContent = error.message;
+                formMsg.className = 'text-red-400 text-sm font-medium text-center pt-2';
+                submitBtn.disabled = false;
+                submitBtn.textContent = currentEditingProductId ? 'Save Changes' : 'Add Product';
+            }
+        });
+        
+        const renderProductTable = (productsMap) => {
+            if (!productListBody) return;
+            if (productsMap.size === 0) {
+                productListBody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-slate-400">No products found.</td></tr>';
+                return;
+            }
+
+            productListBody.innerHTML = [...productsMap.values()].map(product => {
+                const priceFormatted = `LKR ${product.price.toLocaleString()}`;
+                const statusClass = product.stockStatus === 'In Stock' ? 'text-green-400' : 'text-red-400';
+                const statusSelectClass = product.stockStatus === 'In Stock' ? 'in-stock' : 'out-of-stock';
+
+                return `
+                    <tr class="hover:bg-slate-700">
+                        <td class="p-3"><img src="${product.imageUrl}" alt="${product.name}" class="w-12 h-12 object-cover rounded-md"></td>
+                        <td class="p-3 font-medium text-white">${product.name}</td>
+                        <td class="p-3 text-sm">${product.category}</td>
+                        <td class="p-3 text-sm">${product.brand}</td>
+                        <td class="p-3 text-sm">${priceFormatted}</td>
+                        <td class="p-3 text-sm">
+                            <select data-id="${product.id}" class="product-status-select ${statusSelectClass} text-xs py-1 px-2 rounded">
+                                <option value="In Stock" ${product.stockStatus === 'In Stock' ? 'selected' : ''}>In Stock</option>
+                                <option value="Out of Stock" ${product.stockStatus === 'Out of Stock' ? 'selected' : ''}>Out of Stock</option>
+                            </select>
+                        </td>
+                        <td class="p-3 space-x-2">
+                            <button data-id="${product.id}" class="edit-product-btn text-blue-400 hover:text-blue-300" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button data-id="${product.id}" class="delete-product-btn text-red-400 hover:text-red-300" title="Delete"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        };
+
+        const applyFiltersAndListen = () => {
+            const search = filterSearchInput.value.toLowerCase();
+            const category = filterCategoryDropdown.value;
+            const brand = filterBrandDropdown.value;
+
+            let q = query(productsCol);
+            
+            if (category) {
+                q = query(q, where("category", "==", category));
+            }
+            if (brand) {
+                q = query(q, where("brand", "==", brand));
+            }
+
+            if (unsubscribeProductListener) {
+                unsubscribeProductListener();
+            }
+
+            unsubscribeProductListener = onSnapshot(q, (snapshot) => {
+                filteredProducts.clear();
+                snapshot.forEach(doc => {
+                    const product = { id: doc.id, ...doc.data() };
+                    const nameMatch = product.name.toLowerCase().includes(search);
+                    const brandMatch = product.brand.toLowerCase().includes(search);
+                    
+                    if (search === "" || nameMatch || brandMatch) {
+                        filteredProducts.set(doc.id, product);
+                    }
+                });
+                renderProductTable(filteredProducts);
+            }, (error) => {
+                console.error("Error listening to products: ", error);
+                productListBody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-red-400">Error loading products.</td></tr>';
+            });
+        };
+        
+        applyFiltersAndListen();
+        filterSearchInput.addEventListener('input', applyFiltersAndListen);
+        filterCategoryDropdown.addEventListener('change', applyFiltersAndListen);
+        filterBrandDropdown.addEventListener('change', applyFiltersAndListen);
+        
+        if (productListBody) { 
+            productListBody.addEventListener('click', async (e) => {
+                const editBtn = e.target.closest('.edit-product-btn');
+                const deleteBtn = e.target.closest('.delete-product-btn');
+                
+                if (editBtn) {
+                    const id = editBtn.dataset.id;
+                    const product = (await getDoc(doc(db, "products", id))).data();
+                    
+                    if (product) {
+                        resetProductForm();
+                        currentEditingProductId = id;
+                        currentEditingImageUrl = product.imageUrl;
+
+                        document.getElementById('name').value = product.name;
+                        document.getElementById('price').value = product.price;
+                        document.getElementById('category').value = product.category;
+                        
+                        const selectedCategoryName = product.category;
+                        let brands = [];
+                        let specFields = [];
+                        for (const [catId, category] of allCategories.entries()) {
+                            if (category.name === selectedCategoryName) {
+                                brands = category.brands || [];
+                                specFields = category.specFields || [];
+                                break;
+                            }
+                        }
+                        
+                        productBrandDropdown.innerHTML = '<option value="" disabled>Select Brand</option>' + 
+                            brands.sort().map(brand => `<option value="${brand}" ${product.brand === brand ? 'selected' : ''}>${brand}</option>`).join('');
+                        
+                        document.getElementById('brand').value = product.brand;
+                        document.getElementById('stockStatus').value = product.stockStatus;
+                        document.getElementById('description').value = product.description;
+
+                        populateDynamicSpecFields(product, specFields);
+                        
+                        modalTitle.textContent = 'Edit Product';
+                        submitBtn.textContent = 'Save Changes';
+                        cancelBtn.classList.remove('hidden');
+                        productModal.classList.remove('hidden');
+                    }
+                }
+                
+                if (deleteBtn) {
+                    const id = deleteBtn.dataset.id;
+                    if (confirm('Are you sure you want to delete this product?')) {
+                        try {
+                            await deleteDoc(doc(db, "products", id));
+                        } catch (err) {
+                            console.error("Error deleting product: ", err);
+                            alert('Failed to delete product.');
+                        }
+                    }
+                }
+            });
+            
+            productListBody.addEventListener('change', async (e) => {
+                const statusSelect = e.target.closest('.product-status-select');
+                if (statusSelect) {
+                    const id = statusSelect.dataset.id;
+                    const newStatus = statusSelect.value;
+                    const productRef = doc(db, "products", id);
+                    try {
+                        statusSelect.disabled = true;
+                        await updateDoc(productRef, {
+                            stockStatus: newStatus,
+                            updatedAt: new Date()
+                        });
+                        statusSelect.className = `product-status-select text-xs py-1 px-2 rounded ${newStatus === 'In Stock' ? 'in-stock' : 'out-of-stock'}`;
+                    } catch (err) {
+                        console.error("Error updating status: ", err);
+                        alert('Failed to update status.');
+                    } finally {
+                        statusSelect.disabled = false;
+                    }
+                }
+            });
+        }
+
+        const ordersListBody = document.getElementById('orders-list-body');
+        const orderDetailsModal = document.getElementById('order-details-modal');
+        const closeOrderModalBtn = document.getElementById('close-order-modal-btn');
+        const updateStatusBtn = document.getElementById('update-status-btn');
+        const orderStatusSelect = document.getElementById('order-status-select');
+        const orderFormMsg = document.getElementById('order-form-message');
+        let currentEditingOrderId = null;
+        
+        const getStatusClass = (status) => {
+            switch (status) {
+                case 'Pending': return 'bg-yellow-500 text-yellow-900';
+                case 'Processing': return 'bg-blue-500 text-blue-100';
+                case 'Shipped': return 'bg-indigo-500 text-indigo-100';
+                case 'Delivered': return 'bg-green-500 text-green-100';
+                case 'Cancelled': return 'bg-red-500 text-red-100';
+                default: return 'bg-slate-600 text-slate-100';
+            }
+        };
+
+        onSnapshot(query(ordersCol, orderBy("createdAt", "desc")), (snapshot) => {
+            if (!ordersListBody) return;
+            allOrders.clear();
+            if (snapshot.empty) {
+                ordersListBody.innerHTML = '<tr><td colspan="8" class="text-center p-4">No orders found.</td></tr>';
+                return;
+            }
+            ordersListBody.innerHTML = snapshot.docs.map(doc => {
+                const order = { id: doc.id, ...doc.data() };
+                allOrders.set(order.id, order);
+                const date = order.createdAt.toDate().toLocaleDateString('en-GB');
+                const total = order.totalAmount.toLocaleString();
+                const statusClass = getStatusClass(order.status);
+                const phone = order.customer.phone;
+                const whatsappLink = `https://wa.me/${phone.startsWith('0') ? '94' + phone.substring(1) : phone.replace('+', '')}`;
+                const callLink = `tel:${phone}`;
+                
+                return `
+                    <tr class="hover:bg-slate-700">
+                        <td class="p-3 text-sm font-mono">${order.id.substring(0, 8)}...</td>
+                        <td class="p-3 text-sm font-medium text-white">${order.customer.name}</td>
+                        <td class="p-3 text-sm">${date}</td>
+                        <td class="p-3 text-sm">${total}</td>
+                        <td class="p-3 text-sm"><span class="px-2 py-0.5 rounded-full text-xs font-semibold ${statusClass}">${order.status}</span></td>
+                        <td class="p-3 text-center"><a href="${whatsappLink}" target="_blank" class="text-green-400 hover:text-green-300" title="WhatsApp"><i class="fab fa-whatsapp"></i></a></td>
+                        <td class="p-3 text-center"><a href="${callLink}" class="text-blue-400 hover:text-blue-300" title="Call"><i class="fas fa-phone"></i></a></td>
+                        <td class="p-3"><button data-id="${order.id}" class="view-order-details-btn text-amber-400 hover:text-amber-300 text-xs font-semibold">View Details</button></td>
+                    </tr>
+                `;
+            }).join('');
+        }, err => {
+            console.error("Error fetching orders: ", err);
+            if(ordersListBody) ordersListBody.innerHTML = '<tr><td colspan="8" class="text-center p-4 text-red-400">Error loading orders.</td></tr>';
+        });
+
+        if (ordersListBody) {
+            ordersListBody.addEventListener('click', (e) => {
+                const viewBtn = e.target.closest('.view-order-details-btn');
+                if (viewBtn) {
+                    const id = viewBtn.dataset.id;
+                    const order = allOrders.get(id);
+                    if (order) {
+                        currentEditingOrderId = id;
+                        document.getElementById('order-modal-title').textContent = `Order Details (${id.substring(0, 8)}...)`;
+                        document.getElementById('order-customer-name').textContent = order.customer.name;
+                        document.getElementById('order-customer-email').textContent = order.customer.email;
+                        document.getElementById('order-customer-phone').textContent = order.customer.phone;
+                        document.getElementById('order-customer-address').textContent = `${order.customer.address}, ${order.customer.city}, ${order.customer.district}, ${order.customer.postalCode}`;
+                        
+                        document.getElementById('order-items-list').innerHTML = order.items.map(item => `
+                            <div class="py-2 flex justify-between items-center">
+                                <div>
+                                    <p class="font-medium text-white">${item.name} (x${item.quantity})</p>
+                                    <p class="text-sm text-slate-400">LKR ${item.price.toLocaleString()}</p>
+                                </div>
+                                <p class="text-sm font-semibold text-white">LKR ${(item.price * item.quantity).toLocaleString()}</p>
+                            </div>
+                        `).join('');
+                        
+                        document.getElementById('order-total-amount').textContent = order.totalAmount.toLocaleString();
+                        orderStatusSelect.value = order.status;
+                        orderFormMsg.textContent = '';
+                        updateStatusBtn.disabled = false;
+                        orderDetailsModal.classList.remove('hidden');
+                    }
+                }
+            });
+        }
+        
+        closeOrderModalBtn.addEventListener('click', () => {
+            orderDetailsModal.classList.add('hidden');
+            currentEditingOrderId = null;
+        });
+        
+        updateStatusBtn.addEventListener('click', async () => {
+            if (!currentEditingOrderId) return;
+            
+            const newStatus = orderStatusSelect.value;
+            const orderRef = doc(db, "orders", currentEditingOrderId);
+            updateStatusBtn.disabled = true;
+            orderFormMsg.textContent = 'Updating...';
+            orderFormMsg.className = 'text-yellow-400 text-sm font-medium text-center pt-2';
+
+            try {
+                await updateDoc(orderRef, {
+                    status: newStatus
+                });
+                orderFormMsg.textContent = 'Status updated successfully!';
+                orderFormMsg.className = 'text-green-400 text-sm font-medium text-center pt-2';
+                setTimeout(() => {
+                    orderDetailsModal.classList.add('hidden');
+                    currentEditingOrderId = null;
+                }, 1500);
+            } catch (error) {
+                console.error("Error updating order status: ", error);
+                orderFormMsg.textContent = 'Failed to update status.';
+                orderFormMsg.className = 'text-red-400 text-sm font-medium text-center pt-2';
+                updateStatusBtn.disabled = false;
+            }
+        });
+
+        const addOfferForm = document.getElementById('add-offer-form');
+        const offerProductsListContainer = document.getElementById('offer-products-list');
+        const addOfferBtn = document.getElementById('add-offer-btn');
+        const offerFormMsg = document.getElementById('offer-form-message');
+        const existingOffersContainer = document.getElementById('existing-offers-container');
+        
+        const renderOfferProductList = () => {
+            if (!offerProductsListContainer) return;
+            if (allProductsMaster.size === 0) {
+                offerProductsListContainer.innerHTML = '<p class="text-slate-400 text-sm">No products found to create an offer.</p>';
+                return;
+            }
+            
+            const sortedProducts = [...allProductsMaster.values()].sort((a, b) => a.name.localeCompare(b.name));
+            offerProductsListContainer.innerHTML = sortedProducts.map(product => `
+                <div class="flex items-center">
+                    <input type="checkbox" id="offer-prod-${product.id}" value="${product.id}" class="offer-product-checkbox h-4 w-4 mr-2">
+                    <label for="offer-prod-${product.id}" class="text-sm text-slate-200">${product.name} <span class="text-slate-400">(LKR ${product.price.toLocaleString()})</span></label>
+                </div>
+            `).join('');
+        };
+        
+        if (addOfferForm) {
+            addOfferForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                addOfferBtn.disabled = true;
+                offerFormMsg.textContent = 'Adding...';
+                offerFormMsg.className = 'text-yellow-400 text-sm font-medium text-center pt-2';
+                
+                const offerName = document.getElementById('offer-name').value.trim();
+                const offerBannerUrl = document.getElementById('offer-banner-url').value.trim();
+                const offerDisplayOrder = parseInt(document.getElementById('offer-display-order').value) || 10;
+                const offerPercentage = parseFloat(document.getElementById('offer-percentage').value) || 0;
+                const offerPrice = parseFloat(document.getElementById('offer-price').value) || 0;
+                const selectedProductIds = Array.from(offerProductsListContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                
+                try {
+                    if (!offerName) {
+                        throw new Error('Offer Name is required.');
+                    }
+                    if (selectedProductIds.length === 0) {
+                         throw new Error('At least one product must be selected.');
+                    }
+                    if (!offerPercentage && !offerPrice && !offerBannerUrl) { // Allow if only banner
+                        throw new Error('A discount or a banner URL is required.');
+                    }
+                    
+                    const offerData = {
+                        name: offerName,
+                        bannerImageUrl: offerBannerUrl || null,
+                        displayOrder: offerDisplayOrder,
+                        percentage: offerPercentage || null,
+                        specialPrice: offerPrice || null,
+                        productIds: selectedProductIds,
+                        createdAt: new Date()
+                    };
+                    
+                    await addDoc(offersCol, offerData);
+                    addOfferForm.reset();
+                    document.getElementById('offer-display-order').value = 10;
+                    offerFormMsg.textContent = 'Offer added successfully!';
+                    offerFormMsg.className = 'text-green-400 text-sm font-medium text-center pt-2';
+                
+                } catch (error) {
+                    console.error("Error adding offer: ", error);
+                    offerFormMsg.textContent = error.message;
+                    offerFormMsg.className = 'text-red-400 text-sm font-medium text-center pt-2';
+                } finally {
+                    addOfferBtn.disabled = false;
+                    setTimeout(() => { offerFormMsg.textContent = ''; }, 3000);
+                }
+            });
+        }
+        
+        const renderExistingOffers = () => {
+            if (!existingOffersContainer) return;
+
+            const sortedOffers = [...allOffers.entries()].sort((a, b) => {
+                const orderA = a[1].displayOrder || 999;
+                const orderB = b[1].displayOrder || 999;
+                return orderA - orderB;
+            });
+
+            if (sortedOffers.length === 0) {
+                existingOffersContainer.innerHTML = '<p class="text-slate-400">No offers created yet.</p>';
+                return;
+            }
+            
+            existingOffersContainer.innerHTML = sortedOffers.map(([id, offer]) => {
+                let discountText = '';
+                if (offer.specialPrice) {
+                    discountText = `<p class="text-sm text-amber-400 font-semibold">Special Price: LKR ${offer.specialPrice.toLocaleString()}</p>`;
+                } else if (offer.percentage) {
+                    discountText = `<p class="text-sm text-amber-400 font-semibold">${offer.percentage}% OFF</p>`;
+                }
+                
+                const productNames = (offer.productIds || [])
+                    .map(pid => {
+                        const product = allProductsMaster.get(pid);
+                        return product ? product.name : '<s>Deleted Product</s>';
+                    })
+                    .join(', ');
+
+                const bannerIndicator = offer.bannerImageUrl 
+                    ? `<span class="ml-2 text-xs bg-green-600 text-white px-2 py-0.5 rounded-full inline-flex items-center gap-1"><i class="fas fa-image"></i> Banner</span>`
+                    : '';
+                const orderText = `<span class="text-xs text-slate-400 mr-3">(Order: ${offer.displayOrder || 'N/A'})</span>`;
+                
+                return `
+                <div class="bg-slate-700 p-4 rounded-lg">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-lg text-white flex items-center">${offer.name} ${bannerIndicator}</h3>
+                            ${discountText}
+                        </div>
+                        <div class="flex-shrink-0 flex items-center">
+                            ${orderText}
+                            <button data-id="${id}" class="delete-offer-btn text-red-400 hover:text-red-300 text-xs font-semibold" title="Delete Offer"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-300 mt-2"><strong>Products:</strong> ${productNames}</p>
+                </div>`;
+            }).join('');
+        };
+
+        onSnapshot(query(offersCol, orderBy("displayOrder", "asc")), (snapshot) => {
+            allOffers.clear();
+            snapshot.forEach(doc => { allOffers.set(doc.id, { id: doc.id, ...doc.data() }); });
+            renderExistingOffers();
+        }, err => console.error("Error fetching offers: ", err));
+
+        if (existingOffersContainer) {
+            existingOffersContainer.addEventListener('click', async (e) => {
+                const deleteBtn = e.target.closest('.delete-offer-btn');
+                if (deleteBtn) {
+                    const id = deleteBtn.dataset.id;
+                    if (confirm('Are you sure you want to delete this offer?')) {
+                        try {
+                            await deleteDoc(doc(db, "offers", id));
+                        } catch (err) {
+                            console.error("Error deleting offer: ", err);
+                            alert('Failed to delete offer.');
+                        }
+                    }
+                }
+            });
+        }
+
+        const usersTableBody = document.getElementById('users-table-body');
+        onSnapshot(query(usersCol, orderBy("createdAt", "desc")), (snapshot) => {
+            if (!usersTableBody) return;
+            if (snapshot.empty) {
+                usersTableBody.innerHTML = '<tr><td colspan="8" class="text-center p-4">No users found.</td></tr>';
+                return;
+            }
+            usersTableBody.innerHTML = snapshot.docs.map(doc => {
+                const user = doc.data();
+                const date = user.createdAt?.toDate().toLocaleDateString('en-GB') || 'N/A';
+                return `
+                    <tr class="hover:bg-slate-700">
+                        <td class="p-3">${user.name || ''}</td>
+                        <td class="p-3">${user.email || ''}</td>
+                        <td class="p-3">${user.phone || ''}</td>
+                        <td class="p-3">${user.address || ''}</td>
+                        <td class="p-3">${user.city || ''}</td>
+                        <td class="p-3">${user.district || ''}</td>
+                        <td class="p-3">${user.postalCode || ''}</td>
+                        <td class="p-3">${date}</td>
+                    </tr>
+                `;
+            }).join('');
+        }, err => {
+            console.error("Error fetching users: ", err);
+            if(usersTableBody) usersTableBody.innerHTML = '<tr><td colspan="8" class="text-center p-4 text-red-400">Error loading users.</td></tr>';
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            signOut(auth).catch(error => {
+                console.error('Logout Error', error);
+                alert('Failed to log out.');
+            });
+        });
+
+    </script>
+</body>
+</html>

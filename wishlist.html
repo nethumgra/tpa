@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist - TPA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .modal-bg { background-color: rgba(0,0,0,0.5); }
+        .tab-button.active { border-color: #eab308; color: #eab308; }
+        .header-top-bar { background-color: #eab308; }
+        .main-nav { background-color: #f3f4f6; border-bottom: 1px solid #e5e7eb; }
+        .site-footer { background-color: #f8f8f8; color: #555; font-size: 0.875rem; }
+        .site-footer h4 { font-weight: 600; color: #333; margin-bottom: 1rem; text-transform: uppercase; }
+        .site-footer a { color: #555; transition: color 0.2s ease; }
+        .site-footer a:hover { color: #d97706; }
+        .footer-bottom { background-color: #eee; color: #666; font-size: 0.75rem; }
+        .footer-bottom .fa-cc-visa { color: #1A1F71; }
+        .footer-bottom .fa-cc-amex { color: #007BC1; }
+        .footer-bottom .fa-cc-paypal { color: #003087; }
+        .footer-bottom .fa-cc-mastercard { color: #EB001B; }
+        .footer-bottom .fa-cc-discover { color: #FF6600; }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .pop { animation: pop 0.2s ease-out; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div id="auth-modal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center hidden"> <div class="bg-white rounded-lg shadow-xl w-full max-w-md m-4"> <div class="p-4 border-b"> <div class="flex justify-between items-center"> <h2 class="text-xl font-bold text-slate-700">Welcome!</h2> <button id="close-modal-btn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button> </div> </div> <div class="p-2 bg-slate-100 flex gap-2"> <button id="login-tab-btn" class="tab-button active flex-1 bg-white p-2 rounded-md font-semibold border-b-2">Login</button> <button id="signup-tab-btn" class="tab-button flex-1 bg-white p-2 rounded-md font-semibold text-slate-500 border-b-2 border-transparent">Sign Up</button> </div> <div class="p-6" style="max-height: 70vh; overflow-y: auto;"> <form id="login-form" class="space-y-4"> <input type="email" id="login-email" placeholder="Email" required class="w-full p-3 border rounded-md"> <input type="password" id="login-password" placeholder="Password" required class="w-full p-3 border rounded-md"> <button type="submit" class="w-full bg-amber-600 text-white p-3 rounded-md hover:bg-amber-700">Login</button> <p id="login-error" class="text-red-500 text-sm text-center"></p> </form> <form id="signup-form" class="space-y-4 hidden"> <input type="text" id="signup-name" placeholder="Full Name" required class="w-full p-3 border rounded-md"> <input type="email" id="signup-email" placeholder="Email" required class="w-full p-3 border rounded-md"> <input type="password" id="signup-password" placeholder="Password" required class="w-full p-3 border rounded-md"> <input type="tel" id="signup-phone" placeholder="Phone Number" required class="w-full p-3 border rounded-md"> <input type="text" id="signup-address" placeholder="Address" required class="w-full p-3 border rounded-md"> <div class="grid grid-cols-2 gap-4"> <input type="text" id="signup-city" placeholder="City" required class="w-full p-3 border rounded-md"> <input type="text" id="signup-district" placeholder="District" required class="w-full p-3 border rounded-md"> </div> <input type="text" id="signup-postal-code" placeholder="Postal Code" required class="w-full p-3 border rounded-md"> <button type="submit" class="w-full bg-amber-600 text-white p-3 rounded-md hover:bg-amber-700">Create Account</button> <p id="signup-error" class="text-red-500 text-sm text-center"></p> </form> </div> </div> </div>
+    
+    <div id="tracking-modal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center hidden"> <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl m-4" style="max-height: 90vh;"> <div class="p-6 flex justify-between items-center border-b"> <h2 class="text-3xl font-bold text-slate-800">My Orders</h2> <button id="close-tracking-btn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button> </div> <div id="tracking-items-container" class="p-6 flex flex-col" style="max-height: calc(90vh - 100px); overflow-y: auto;"> <p class="text-slate-500 text-center">Loading your orders...</p> </div> </div> </div>
+
+     <header class="sticky top-0 z-40 bg-white shadow-md">
+          <div class="header-top-bar text-white text-xs py-1"> <div class="container mx-auto px-4 flex justify-between items-center"> <span>Your Ultimate Destination</span> <div class="flex items-center space-x-4"> <a href="#" class="hover:text-gray-300"><i class="fab fa-facebook-f"></i></a> <a href="#" class="hover:text-gray-300"><i class="fab fa-instagram"></i></a> <a href="#" class="hover:text-gray-300"><i class="fab fa-whatsapp"></i></a> <span class="border-l border-amber-400 h-4"></span> <a href="#" class="hover:underline">NEWSLETTER</a> <a href="#" class="hover:underline">CONTACT US</a> <a href="#" class="hover:underline">FAQS</a> </div> </div> </div> <div class="py-4 border-b"> <div class="container mx-auto px-4 flex justify-between items-center gap-6"> <a href="index.html" id="logo-btn" class="flex-shrink-0">
+                   <img src="LOGO.png" alt="TPA - The Phone Arcade" class="h-10 md:h-12">
+                   </a> <div class="flex-grow flex border border-gray-300 rounded-md overflow-hidden"> <input type="text" id="search-bar" placeholder="Search for products" class="w-full px-4 py-2 focus:outline-none text-sm">
+                   <select id="search-category-dropdown" class="border-l border-gray-300 px-2 text-sm text-gray-600 focus:outline-none bg-gray-50 hidden md:block">
+                        <option value="all">ALL CATEGORIES</option>
+                   </select>
+                   <button id="search-icon-btn" class="bg-gray-100 px-4 text-gray-600 hover:bg-gray-200"> <i class="fas fa-search"></i> </button> </div> <div class="flex items-center space-x-3 md:space-x-4 text-gray-700"> <div id="auth-links" class="text-sm hidden md:block"> <button id="login-btn-nav" class="hover:text-amber-700">LOGIN</button> / <button id="signup-btn-nav" class="hover:text-amber-700">REGISTER</button> </div>
+                    
+                    <div id="user-info" class="hidden items-center space-x-3 text-sm">
+                        <a href="profile.html" class="flex items-center gap-2 hover:text-amber-700 p-1 rounded-md">
+                            <i class="fas fa-user-circle text-2xl text-gray-500"></i>
+                            <span id="user-email" class="hidden lg:inline font-medium text-gray-700"></span>
+                        </a>
+                        <span class="border-l h-5 self-center"></span>
+                        <button id="logout-btn-nav" class="hover:text-red-600 text-gray-600 text-xs font-medium uppercase tracking-wider hover:bg-gray-100 p-2 rounded-md">Logout</button>
+                    </div>
+
+                    <span class="border-l h-5 self-center hidden md:block"></span> 
+                    
+                    <a href="wishlist.html" title="Wishlist" class="relative hover:text-amber-700 text-amber-600"> 
+                        <i class="fas fa-heart text-xl"></i> 
+                        <span id="wishlist-count-badge" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> 
+                    </a> 
+                    
+                    <a href="#" title="Compare" class="relative hover:text-amber-700 hidden md:block"> <i class="fas fa-exchange-alt text-xl"></i> <span class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> </a> <a href="cart.html" id="cart-icon" title="Cart" class="relative hover:text-amber-700 flex items-center"> <i class="fas fa-shopping-bag text-xl"></i> <span id="cart-count-badge" class="absolute -top-1 -right-2 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> <span class="ml-2 text-sm font-semibold hidden md:inline">Rs.0.00</span> </a> <button id="tracking-icon-btn" title="Track My Orders" class="relative hover:text-amber-700"> <i class="fas fa-clipboard-list text-xl"></i> </button> </div> </div> </div> <nav class="main-nav hidden md:block"> <div class="container mx-auto px-4 flex justify-between items-center h-12"> <div class="flex space-x-6 text-sm font-medium"> <a href="index.html" class="text-gray-700 hover:text-amber-700">HOME</a> <a href="#" class="text-gray-700 hover:text-amber-700">SHOP</a> <a href="#" class="text-gray-700 hover:text-amber-700">ABOUT US</a> <a href="#" class="text-gray-700 hover:text-amber-700">CONTACT US</a> <a href="#" class="text-gray-700 hover:text-amber-700">STORE</a> </div> <a href="#" class="text-amber-600 font-semibold text-sm flex items-center gap-1 hover:text-gray-900"> <i class="fas fa-heart text-xs"></i> SPECIAL OFFERS </a> </div> </nav>
+     </header>
+
+     <main class="container mx-auto p-4 md:p-8">
+        <div id="wishlist-main-container" class="bg-white rounded-lg shadow-xl overflow-hidden max-w-4xl mx-auto p-6 md:p-8">
+            <div class="mb-6 pb-4 border-b">
+                <h1 class="text-3xl font-bold text-gray-800">My Wishlist</h1>
+                <p class="text-gray-600 text-sm">Products you've saved for later.</p>
+            </div>
+            
+            <div id="wishlist-container" class="divide-y divide-gray-200">
+                
+                <p class="text-center py-8 text-gray-500">Loading your wishlist...</p>
+
+                </div>
+        </div>
+    </main>
+   <footer class="site-footer border-t pt-10 mt-10">
+          <div class="container mx-auto px-4 pb-10">
+               <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div class="space-y-4">
+                         <img src="LOGO.png" alt="TPA - The Phone Arcade" class="h-10 mb-4">
+                         <p>High-quality electronics, essentials & appliances are now at your fingertips. Confirm your order now !</p>
+                         <p><i class="fas fa-map-marker-alt mr-2 text-amber-700"></i> 890/a Main Street, Kaduruwela, Polonnaruwa</p>
+                         <p><i class="fas fa-phone-alt mr-2 text-amber-700"></i> Phone: 077 754 9654 / 027 222 4470</p>
+                         <p><i class="fas fa-envelope mr-2 text-amber-700"></i> Email: info@buyzone.lk</p>
+                    </div>
+                    <div>
+                         <h4>Quick Links</h4>
+                         <ul class="space-y-2">
+                              <li><a href="index.html">Home</a></li>
+                              <li><a href="shop.html">Shop</a></li>
+                              <li><a href="about.html">About Us</a></li>
+                              <li><a href="contact.html">Contact Us</a></li>
+                              <li><a href="#">Special Offers</a></li>
+                         </ul>
+                    </div>
+                    <div>
+                         <h4>Useful Links</h4>
+                         <ul class="space-y-2">
+                              <li><a href="#">Privacy Policy</a></li>
+                              <li><a href="#">Returns</a></li>
+                              <li><a href="#">Terms & Conditions</a></li>
+                              <li><a href="#">Contact Us</a></li>
+                              <li><a href="#">Latest News</a></li>
+                              <li><a href="#">Our Sitemap</a></li>
+                         </ul>
+                    </div>
+                    <div>
+                         <h4>My Account</h4>
+                         <ul class="space-y-2">
+                              <li><a href="profile.html">My Profile</a></li>
+                              <li><a href="cart.html">View Cart</a></li>
+                              <li><a href="#" id="footer-orders-link">Track My Orders</a></li>
+                              <li><a href="wishlist.html">My Wishlist</a></li>
+                         </ul>
+                    </div>
+               </div>
+          </div>
+          <div class="footer-bottom py-4 px-4">
+               <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+                    <span>TPA © 2025 CREATED BY <a href="https://pixora.com" target="_blank" rel="noopener noreferrer" class="font-semibold hover:text-amber-700">PIXORA IT SOLUTIONS</a></span>
+                    <div class="flex space-x-2 mt-4 md:mt-0">
+                         <i class="fab fa-cc-visa text-2xl"></i>
+                         <i class="fab fa-cc-amex text-2xl"></i>
+                         <i class="fab fa-cc-paypal text-2xl"></i>
+                         <i class="fab fa-cc-mastercard text-2xl"></i>
+                         <i class="fab fa-cc-discover text-2xl"></i>
+                         </div>
+               </div>
+          </div>
+     </footer>
+
+     <script type="module">
+    
+    // Firebase Imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    
+    // Firebase Config
+    const firebaseConfig = {
+     apiKey: "AIzaSyAtvnbedBpCiRe_ZyfoB-TacrboEMgft5Y", authDomain: "mobile-shop-1c315.firebaseapp.com", projectId: "mobile-shop-1c315", storageBucket: "mobile-shop-1c315.firebasestorage.app", messagingSenderId: "689278786227", appId: "1:689278786227:web:ee06565e4a230381bf6ec6", measurementId: "G-MLDEWBBEMV"
+    };
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const ordersCol = collection(db, 'orders'); 
+
+    // Header & Modal DOM Elements
+    const authModal = document.getElementById('auth-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const loginBtnNav = document.getElementById('login-btn-nav');
+    const signupBtnNav = document.getElementById('signup-btn-nav');
+    const logoutBtnNav = document.getElementById('logout-btn-nav');
+    const loginTab = document.getElementById('login-tab-btn');
+    const signupTab = document.getElementById('signup-tab-btn');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const authLinks = document.getElementById('auth-links');
+    const userInfo = document.getElementById('user-info');
+    const userEmailSpan = document.getElementById('user-email');
+    const trackingModal = document.getElementById('tracking-modal');
+    const closeTrackingBtn = document.getElementById('close-tracking-btn');
+    const trackingIconBtn = document.getElementById('tracking-icon-btn');
+    const trackingItemsContainer = document.getElementById('tracking-items-container'); 
+    const footerOrdersLink = document.getElementById('footer-orders-link');
+    const cartCountBadge = document.getElementById('cart-count-badge');
+    const wishlistCountBadge = document.getElementById('wishlist-count-badge');
+
+    // *** WISHLIST PAGE DOM ELEMENTS ***
+    const wishlistContainer = document.getElementById('wishlist-container');
+
+
+    // --- Header & Auth Logic (profile.html eken copy kare) ---
+
+    const openModal = (isLogin = true) => { if(authModal) authModal.classList.remove('hidden'); if(isLogin){ if(loginTab) loginTab.click(); } else { if(signupTab) signupTab.click(); } }; if(loginBtnNav) loginBtnNav.addEventListener('click', () => openModal(true)); if(signupBtnNav) signupBtnNav.addEventListener('click', () => openModal(false)); if(closeModalBtn) closeModalBtn.addEventListener('click', () => {if(authModal) authModal.classList.add('hidden');}); if(loginTab) loginTab.addEventListener('click', () => { loginTab.classList.add('active'); if(signupTab) signupTab.classList.remove('active'); if(loginForm) loginForm.classList.remove('hidden'); if(signupForm) signupForm.classList.add('hidden'); }); if(signupTab) signupTab.addEventListener('click', () => { signupTab.classList.add('active'); if(loginTab) loginTab.classList.remove('active'); if(signupForm) signupForm.classList.remove('hidden'); if(loginForm) loginForm.classList.add('hidden'); });
+    if(loginForm) loginForm.addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('login-email').value; const password = document.getElementById('login-password').value; const errorP = document.getElementById('login-error'); if(errorP) errorP.textContent = ''; try { await signInWithEmailAndPassword(auth, email, password); } catch (error) { console.error("Login Error:", error); if(errorP) errorP.textContent = error.message; } }); if(signupForm) signupForm.addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('signup-email').value; const password = document.getElementById('signup-password').value; const name = document.getElementById('signup-name').value; const phone = document.getElementById('signup-phone').value; const address = document.getElementById('signup-address').value; const city = document.getElementById('signup-city').value; const district = document.getElementById('signup-district').value; const postalCode = document.getElementById('signup-postal-code').value; const errorP = document.getElementById('signup-error'); if(errorP) errorP.textContent = ''; try { const userCredential = await createUserWithEmailAndPassword(auth, email, password); const user = userCredential.user; await setDoc(doc(db, "users", user.uid), { name: name, email: email, phone: phone, address: address, city: city, district: district, postalCode: postalCode, createdAt: serverTimestamp(), role: "customer" }); } catch (error) { console.error("Signup Error:", error); if(errorP) errorP.textContent = error.message; } }); 
+    if(logoutBtnNav) logoutBtnNav.addEventListener('click', () => { signOut(auth).then(() => { window.location.href = 'index.html'; }); });
+    if(trackingIconBtn) trackingIconBtn.addEventListener('click', (e) => { e.preventDefault(); if(trackingModal) trackingModal.classList.remove('hidden'); loadUserOrders(); }); 
+    if(closeTrackingBtn) closeTrackingBtn.addEventListener('click', () => { if(trackingModal) trackingModal.classList.add('hidden'); }); 
+    if(footerOrdersLink) { footerOrdersLink.addEventListener('click', (e) => { e.preventDefault(); if(trackingModal) trackingModal.classList.remove('hidden'); loadUserOrders(); }); }
+
+    // Auth state eka header eka update karanna
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            if(authLinks) { authLinks.classList.add('hidden'); authLinks.classList.remove('md:block'); }
+            if(userInfo) { userInfo.classList.remove('hidden'); userInfo.classList.add('flex'); }
+            if(userEmailSpan) userEmailSpan.textContent = user.email;
+        } else {
+            if(authLinks) { authLinks.classList.remove('hidden'); authLinks.classList.add('md:block'); }
+            if(userInfo) { userInfo.classList.add('hidden'); userInfo.classList.remove('flex'); }
+            if(userEmailSpan) userEmailSpan.textContent = '';
+        }
+    });
+
+    // Orders Modal Load karana function eka
+    const loadUserOrders = async () => { 
+        if(!trackingItemsContainer) return; 
+        trackingItemsContainer.innerHTML = '<p class="text-slate-500 text-center">Loading your orders...</p>'; 
+        const user = auth.currentUser; 
+        if (!user) { 
+            trackingItemsContainer.innerHTML = ` <div class="text-center p-8"> <h3 class="text-xl font-semibold text-slate-700 mb-4">Please Log In</h3> <p class="text-slate-500 mb-6">You need to be logged in to view your order history.</p> <button id="tracking-login-btn" class="bg-amber-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-amber-700">Login Now</button> </div>`; 
+            const trackingLoginBtn = document.getElementById('tracking-login-btn'); 
+            if (trackingLoginBtn) { 
+                trackingLoginBtn.addEventListener('click', () => { 
+                    if(trackingModal) trackingModal.classList.add('hidden'); 
+                    openModal(true); 
+                }); 
+            } 
+            return; 
+        } 
+        try { 
+            const q = query(ordersCol, where("userId", "==", user.uid), orderBy("createdAt", "desc")); 
+            const querySnapshot = await getDocs(q); 
+            if (querySnapshot.empty) { 
+                trackingItemsContainer.innerHTML = ` <div class="text-center p-8"> <h3 class="text-xl font-semibold text-slate-700 mb-4">No Orders Found</h3> <p class="text-slate-500">You haven't placed any orders with us yet.</p> </div>`; 
+                return; 
+            } 
+            trackingItemsContainer.innerHTML = querySnapshot.docs.map(doc => { const order = doc.data() || {}; const orderId = doc.id; const createdDate = order.createdAt ? order.createdAt.toDate().toLocaleDateString('si-LK', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A'; const itemSummary = (order.items || []).map(item => `${item.name || 'Item'} (x${item.quantity || 1})`).join(', '); let statusColor = 'bg-slate-100 text-slate-700'; const statusLower = (order.status || 'Pending').toLowerCase(); if (statusLower === 'pending') statusColor = 'bg-yellow-100 text-yellow-800'; else if (statusLower === 'shipped' || statusLower === 'processing') statusColor = 'bg-blue-100 text-blue-800'; else if (statusLower === 'delivered') statusColor = 'bg-green-100 text-green-800'; else if (statusLower === 'cancelled') statusColor = 'bg-red-100 text-red-800'; return ` <div class="bg-white border rounded-lg p-4 mb-4 shadow-sm"> <div class="flex flex-col sm:flex-row justify-between items-start mb-3"> <div> <p class="text-xs text-slate-500">Order ID: ${orderId}</p> <p class="font-bold text-lg text-slate-800">Total: Rs. ${(order.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p> </div> <span class="text-sm font-bold px-3 py-1 rounded-full ${statusColor} mt-2 sm:mt-0">${order.status || 'Pending'}</span> </div> <p class="text-sm text-slate-600 mb-2"><strong>Placed On:</strong> ${createdDate}</p> <p class="text-sm text-slate-600 mb-3 break-words"><strong>Items:</strong> ${itemSummary || 'No items found'}</p> <div class="bg-slate-50 p-3 rounded-md"> <p class="text-sm font-semibold text-slate-700">Shipping to: ${order.customerInfo?.name || 'N/A'}</p> <p class="text-xs text-slate-500">${order.customerInfo?.address || 'N/A'}, ${order.customerInfo?.city || ''}</p> </div> </div>`; }).join(''); 
+        } catch (error) { 
+            console.error("Error fetching orders: ", error); 
+            trackingItemsContainer.innerHTML = '<p class="text-red-500 text-center">Could not load your orders. Please try again later.</p>'; 
+        } 
+    };
+
+
+    // --- Wishlist Page Logic (index.html eken copy kare) ---
+
+    // Cart Functions
+    const getCart = () => JSON.parse(localStorage.getItem('mobileHubCart')) || [];
+    const saveCart = (cart) => localStorage.setItem('mobileHubCart', JSON.stringify(cart));
+    const updateCartCountBadge = () => { const cart = getCart(); const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0); const cartTotalValue = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0); if (cartCountBadge) { if (totalItems > 0) { cartCountBadge.textContent = totalItems; cartCountBadge.classList.remove('hidden'); cartCountBadge.classList.add('pop'); setTimeout(() => cartCountBadge.classList.remove('pop'), 200); } else { cartCountBadge.textContent = '0'; cartCountBadge.classList.remove('hidden', 'pop'); } } const cartTotalText = document.querySelector('#cart-icon span.md\\:inline'); if (cartTotalText) { cartTotalText.textContent = `Rs.${cartTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`; } };
+
+    // Wishlist Functions
+    const getWishlist = () => JSON.parse(localStorage.getItem('mobileHubWishlist')) || [];
+    const saveWishlist = (wishlist) => localStorage.setItem('mobileHubWishlist', JSON.stringify(wishlist));
+    const updateWishlistCountBadge = () => {
+         const wishlist = getWishlist();
+         const totalItems = wishlist.length;
+         if (wishlistCountBadge) {
+             if (totalItems > 0) {
+                  wishlistCountBadge.textContent = totalItems;
+                  wishlistCountBadge.classList.remove('hidden');
+             } else {
+                  wishlistCountBadge.textContent = '0';
+             }
+             wishlistCountBadge.classList.add('pop');
+             setTimeout(() => wishlistCountBadge.classList.remove('pop'), 200);
+         }
+    };
+
+    // Wishlist eken Cart ekata add karana aluth function eka
+    const addToCartFromWishlist = (productId) => {
+         let cart = getCart();
+         let wishlist = getWishlist();
+         const product = wishlist.find(p => p.id === productId); 
+         if (!product) {
+             console.error("Product not found in wishlist!");
+             return;
+         }
+         
+         const existingItem = cart.find(item => item.id === productId);
+         if (existingItem) {
+             existingItem.quantity++;
+         } else {
+             // Product eke data wishlist eken gannawa
+             cart.push({ 
+                 id: product.id, 
+                 name: product.name, 
+                 price: product.price, 
+                 originalPrice: product.price, // Wishlist eke originalPrice nathi nisa, price ekama danawa
+                 imageUrl: product.imageUrl, 
+                 quantity: 1 
+             });
+         }
+         saveCart(cart);
+         updateCartCountBadge();
+         alert(`${product.name} added to cart!`);
+    };
+
+    // Wishlist eka render karana main function eka
+    const renderWishlist = () => {
+        if (!wishlistContainer) return;
+
+        const wishlist = getWishlist();
+
+        if (wishlist.length === 0) {
+            wishlistContainer.innerHTML = `
+                <div class="text-center py-10">
+                    <i class="fas fa-heart text-4xl text-gray-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Your Wishlist is Empty</h3>
+                    <p class="text-gray-500 mb-6">You haven't added any products to your wishlist yet.</p>
+                    <a href="index.html" class="bg-amber-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-amber-700">
+                        Start Shopping
+                    </a>
+                </div>`;
+            return;
+        }
+
+        wishlistContainer.innerHTML = wishlist.map(item => `
+            <div class="wishlist-item flex flex-col sm:flex-row items-center gap-4 py-4">
+                <button class="wishlist-remove-btn text-gray-400 hover:text-red-500 self-start sm:self-center" title="Remove" data-id="${item.id}">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+                <img src="${item.imageUrl || 'https://via.placeholder.com/80'}" alt="${item.name}" class="w-20 h-20 object-contain rounded border p-1">
+                <div class="flex-grow text-center sm:text-left">
+                    <h3 class="font-semibold text-gray-800">${item.name}</h3>
+                </div>
+                <p class="font-bold text-amber-600 w-full sm:w-32 text-center sm:text-right text-lg">
+                    Rs. ${item.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </p>
+                <button class="wishlist-add-to-cart-btn bg-amber-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-amber-700 w-full sm:w-auto" data-id="${item.id}">
+                    Add to Cart
+                </button>
+            </div>
+        `).join('');
+    };
+
+    // Wishlist eke buttons click karana eka
+    if (wishlistContainer) {
+        wishlistContainer.addEventListener('click', (e) => {
+            // Remove button eka
+            if (e.target.closest('.wishlist-remove-btn')) {
+                const productId = e.target.closest('.wishlist-remove-btn').dataset.id;
+                if (confirm('Are you sure you want to remove this item from your wishlist?')) {
+                    let wishlist = getWishlist();
+                    wishlist = wishlist.filter(item => item.id !== productId);
+                    saveWishlist(wishlist);
+                    renderWishlist(); // List eka refresh karanna
+                    updateWishlistCountBadge(); // Header eke count eka update karanna
+                }
+            }
+
+            // Add to Cart button eka
+            if (e.target.closest('.wishlist-add-to-cart-btn')) {
+                const productId = e.target.closest('.wishlist-add-to-cart-btn').dataset.id;
+                addToCartFromWishlist(productId);
+            }
+        });
+    }
+
+    // Page eka load weddi run wenna
+    renderWishlist();
+    updateCartCountBadge();
+    updateWishlistCountBadge();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop - TPA</title> <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        /* index.html eke styles tika copy kara */
+        body { font-family: 'Inter', sans-serif; }
+        .modal-bg { background-color: rgba(0,0,0,0.5); }
+        .tab-button.active { border-color: #eab308; color: #eab308; }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .pop { animation: pop 0.2s ease-out; }
+        .header-top-bar { background-color: #eab308; }
+        .main-nav { background-color: #f3f4f6; border-bottom: 1px solid #e5e7eb; }
+        .product-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #eab308;
+        }
+        .product-card .product-image-container {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        .product-card .product-image {
+            width: 100%; height: 100%; max-width: 100%; max-height: 100%;
+            object-fit: contain; mix-blend-mode: multiply;
+        }
+        .product-card .action-icons {
+            position: absolute; top: 10px; left: 10px; display: flex;
+            flex-direction: column; gap: 8px; z-index: 20; opacity: 0;
+            transform: translateX(-20px); transition: all 0.3s ease-out;
+        }
+        .product-card:hover .action-icons { opacity: 1; transform: translateX(0); }
+        .product-card .action-icons button, .product-card .action-icons a {
+            background-color: white; border-radius: 50%; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: #374151; transition: all 0.2s ease;
+        }
+        .product-card .action-icons button:hover, .product-card .action-icons a:hover {
+            background-color: #eab308; color: white;
+        }
+        .product-info-area {
+            flex-grow: 1; display: flex; flex-direction: column; padding: 1rem; text-align: left;
+        }
+        .product-card .product-name {
+            min-height: 40px; display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;
+            text-align: left; font-weight: 500; color: #374151; margin-bottom: 0.25rem;
+        }
+        .product-description-snippet {
+             min-height: 36px; display: -webkit-box; -webkit-line-clamp: 2; overflow: hidden;
+             text-overflow: ellipsis; font-size: 0.75rem; color: #6b7280; margin-bottom: 0.5rem;
+             text-align: left;
+        }
+        .product-card .price-section { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 0.5rem; }
+        .site-footer { background-color: #f8f8f8; color: #555; font-size: 0.875rem; }
+        .site-footer h4 { font-weight: 600; color: #333; margin-bottom: 1rem; text-transform: uppercase; }
+        .site-footer a { color: #555; transition: color 0.2s ease; }
+        .site-footer a:hover { color: #d97706; }
+        .footer-bottom { background-color: #eee; color: #666; font-size: 0.75rem; }
+        .footer-bottom .fa-cc-visa { color: #1A1F71; }
+        .footer-bottom .fa-cc-amex { color: #007BC1; }
+        .footer-bottom .fa-cc-paypal { color: #003087; }
+        .footer-bottom .fa-cc-mastercard { color: #EB001B; }
+        .footer-bottom .fa-cc-discover { color: #FF6600; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div id="auth-modal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center hidden"> <div class="bg-white rounded-lg shadow-xl w-full max-w-md m-4"> <div class="p-4 border-b"> <div class="flex justify-between items-center"> <h2 class="text-xl font-bold text-slate-700">Welcome!</h2> <button id="close-modal-btn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button> </div> </div> <div class="p-2 bg-slate-100 flex gap-2"> <button id="login-tab-btn" class="tab-button active flex-1 bg-white p-2 rounded-md font-semibold border-b-2">Login</button> <button id="signup-tab-btn" class="tab-button flex-1 bg-white p-2 rounded-md font-semibold text-slate-500 border-b-2 border-transparent">Sign Up</button> </div> <div class="p-6" style="max-height: 70vh; overflow-y: auto;"> <form id="login-form" class="space-y-4"> <input type="email" id="login-email" placeholder="Email" required class="w-full p-3 border rounded-md"> <input type="password" id="login-password" placeholder="Password" required class="w-full p-3 border rounded-md"> <button type="submit" class="w-full bg-amber-600 text-white p-3 rounded-md hover:bg-amber-700">Login</button> <p id="login-error" class="text-red-500 text-sm text-center"></p> </form> <form id="signup-form" class="space-y-4 hidden"> <input type="text" id="signup-name" placeholder="Full Name" required class="w-full p-3 border rounded-md"> <input type="email" id="signup-email" placeholder="Email" required class="w-full p-3 border rounded-md"> <input type="password" id="signup-password" placeholder="Password" required class="w-full p-3 border rounded-md"> <input type="tel" id="signup-phone" placeholder="Phone Number" required class="w-full p-3 border rounded-md"> <input type="text" id="signup-address" placeholder="Address" required class="w-full p-3 border rounded-md"> <div class="grid grid-cols-2 gap-4"> <input type="text" id="signup-city" placeholder="City" required class="w-full p-3 border rounded-md"> <input type="text" id="signup-district" placeholder="District" required class="w-full p-3 border rounded-md"> </div> <input type="text" id="signup-postal-code" placeholder="Postal Code" required class="w-full p-3 border rounded-md"> <button type="submit" class="w-full bg-amber-600 text-white p-3 rounded-md hover:bg-amber-700">Create Account</button> <p id="signup-error" class="text-red-500 text-sm text-center"></p> </form> </div> </div> </div>
+    
+    <div id="tracking-modal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center hidden"> <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl m-4" style="max-height: 90vh;"> <div class="p-6 flex justify-between items-center border-b"> <h2 class="text-3xl font-bold text-slate-800">My Orders</h2> <button id="close-tracking-btn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button> </div> <div id="tracking-items-container" class="p-6 flex flex-col" style="max-height: calc(90vh - 100px); overflow-y: auto;"> <p class="text-slate-500 text-center">Loading your orders...</p> </div> </div> </div>
+
+     <header class="sticky top-0 z-40 bg-white shadow-md">
+          <div class="header-top-bar text-white text-xs py-1"> <div class="container mx-auto px-4 flex justify-between items-center"> <span>Your Ultimate Destination</span> <div class="flex items-center space-x-4"> <a href="#" class="hover:text-gray-300"><i class="fab fa-facebook-f"></i></a> <a href="#" class="hover:text-gray-300"><i class="fab fa-instagram"></i></a> <a href="#" class="hover:text-gray-300"><i class="fab fa-whatsapp"></i></a> <span class="border-l border-amber-400 h-4"></span> <a href="#" class="hover:underline">NEWSLETTER</a> <a href="#" class="hover:underline">CONTACT US</a> <a href="#" class="hover:underline">FAQS</a> </div> </div> </div> <div class="py-4 border-b"> <div class="container mx-auto px-4 flex justify-between items-center gap-6"> <a href="index.html" id="logo-btn" class="flex-shrink-0">
+                   <img src="LOGO.png" alt="TPA - The Phone Arcade" class="h-10 md:h-12">
+                   </a> <div class="flex-grow flex border border-gray-300 rounded-md overflow-hidden"> <input type="text" id="search-bar" placeholder="Search for products" class="w-full px-4 py-2 focus:outline-none text-sm">
+                   <select id="search-category-dropdown" class="border-l border-gray-300 px-2 text-sm text-gray-600 focus:outline-none bg-gray-50 hidden md:block">
+                        <option value="all">ALL CATEGORIES</option>
+                        </select>
+                   <button id="search-icon-btn" class="bg-gray-100 px-4 text-gray-600 hover:bg-gray-200"> <i class="fas fa-search"></i> </button> </div> <div class="flex items-center space-x-3 md:space-x-4 text-gray-700"> <div id="auth-links" class="text-sm hidden md:block"> <button id="login-btn-nav" class="hover:text-amber-700">LOGIN</button> / <button id="signup-btn-nav" class="hover:text-amber-700">REGISTER</button> </div>
+                    <div id="user-info" class="hidden items-center space-x-3 text-sm">
+                        <a href="profile.html" class="flex items-center gap-2 hover:text-amber-700 p-1 rounded-md">
+                            <i class="fas fa-user-circle text-2xl text-gray-500"></i>
+                            <span id="user-email" class="hidden lg:inline font-medium text-gray-700"></span>
+                        </a>
+                        <span class="border-l h-5 self-center"></span>
+                        <button id="logout-btn-nav" class="hover:text-red-600 text-gray-600 text-xs font-medium uppercase tracking-wider hover:bg-gray-100 p-2 rounded-md">Logout</button>
+                    </div>
+                    <span class="border-l h-5 self-center hidden md:block"></span> 
+                    <a href="wishlist.html" title="Wishlist" class="relative hover:text-amber-700"> 
+                        <i class="fas fa-heart text-xl"></i> 
+                        <span id="wishlist-count-badge" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> 
+                    </a> 
+                    <a href="#" title="Compare" class="relative hover:text-amber-700 hidden md:block"> <i class="fas fa-exchange-alt text-xl"></i> <span class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> </a> 
+                    <a href="cart.html" id="cart-icon" title="Cart" class="relative hover:text-amber-700 flex items-center"> <i class="fas fa-shopping-bag text-xl"></i> <span id="cart-count-badge" class="absolute -top-1 -right-2 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> <span class="ml-2 text-sm font-semibold hidden md:inline">Rs.0.00</span> </a> 
+                    <button id="tracking-icon-btn" title="Track My Orders" class="relative hover:text-amber-700"> <i class="fas fa-clipboard-list text-xl"></i> </button> 
+                </div> </div> </div> 
+                <nav class="main-nav hidden md:block"> <div class="container mx-auto px-4 flex justify-between items-center h-12"> <div class="flex space-x-6 text-sm font-medium"> 
+                    <a href="index.html" class="text-gray-700 hover:text-amber-700">HOME</a> 
+                    <a href="shop.html" class="text-amber-600 hover:text-gray-900">SHOP</a> <a href="about.html" class="text-gray-700 hover:text-amber-700">ABOUT US</a> 
+                    <a href="contact.html" class="text-gray-700 hover:text-amber-700">CONTACT US</a> 
+                    <a href="#" class="text-gray-700 hover:text-amber-700">STORE</a> </div> <a href="#" class="text-amber-600 font-semibold text-sm flex items-center gap-1 hover:text-gray-900"> <i class="fas fa-heart text-xs"></i> SPECIAL OFFERS </a> </div> </nav>
+     </header>
+
+     <main class="container mx-auto p-4 md:p-8">
+        <div class="mb-6 pb-4 border-b">
+            <h1 class="text-3xl font-bold text-gray-800">Shop</h1>
+            <p class="text-gray-600 text-sm">Browse all our available products.</p>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            <div class="flex-1">
+                <div id="shop-product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    <p class="col-span-full text-center text-gray-500 py-10">Loading products...</p>
+                </div>
+                </div>
+        </div>
+     </main>
+  <footer class="site-footer border-t pt-10 mt-10">
+          <div class="container mx-auto px-4 pb-10">
+               <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div class="space-y-4">
+                         <img src="LOGO.png" alt="TPA - The Phone Arcade" class="h-10 mb-4">
+                         <p>High-quality electronics, essentials & appliances are now at your fingertips. Confirm your order now !</p>
+                         <p><i class="fas fa-map-marker-alt mr-2 text-amber-700"></i> 890/a Main Street, Kaduruwela, Polonnaruwa</p>
+                         <p><i class="fas fa-phone-alt mr-2 text-amber-700"></i> Phone: 077 754 9654 / 027 222 4470</p>
+                         <p><i class="fas fa-envelope mr-2 text-amber-700"></i> Email: info@buyzone.lk</p>
+                    </div>
+                    <div>
+                         <h4>Quick Links</h4>
+                         <ul class="space-y-2">
+                              <li><a href="index.html">Home</a></li>
+                              <li><a href="shop.html">Shop</a></li>
+                              <li><a href="about.html">About Us</a></li>
+                              <li><a href="contact.html">Contact Us</a></li>
+                              <li><a href="#">Special Offers</a></li>
+                         </ul>
+                    </div>
+                    <div>
+                         <h4>Useful Links</h4>
+                         <ul class="space-y-2">
+                              <li><a href="#">Privacy Policy</a></li>
+                              <li><a href="#">Returns</a></li>
+                              <li><a href="#">Terms & Conditions</a></li>
+                              <li><a href="#">Contact Us</a></li>
+                              <li><a href="#">Latest News</a></li>
+                              <li><a href="#">Our Sitemap</a></li>
+                         </ul>
+                    </div>
+                    <div>
+                         <h4>My Account</h4>
+                         <ul class="space-y-2">
+                              <li><a href="profile.html">My Profile</a></li>
+                              <li><a href="cart.html">View Cart</a></li>
+                              <li><a href="#" id="footer-orders-link">Track My Orders</a></li>
+                              <li><a href="wishlist.html">My Wishlist</a></li>
+                         </ul>
+                    </div>
+               </div>
+          </div>
+          <div class="footer-bottom py-4 px-4">
+               <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+                    <span>TPA © 2025 CREATED BY <a href="https://pixora.com" target="_blank" rel="noopener noreferrer" class="font-semibold hover:text-amber-700">PIXORA IT SOLUTIONS</a></span>
+                    <div class="flex space-x-2 mt-4 md:mt-0">
+                         <i class="fab fa-cc-visa text-2xl"></i>
+                         <i class="fab fa-cc-amex text-2xl"></i>
+                         <i class="fab fa-cc-paypal text-2xl"></i>
+                         <i class="fab fa-cc-mastercard text-2xl"></i>
+                         <i class="fab fa-cc-discover text-2xl"></i>
+                         </div>
+               </div>
+          </div>
+     </footer>
+     
+     <script type="module">
+    
+    // Firebase Imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy, where, doc, getDoc, getDocs, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"; // Firestore imports tikak add kala
+    
+    // Firebase Config
+    const firebaseConfig = {
+     apiKey: "AIzaSyAtvnbedBpCiRe_ZyfoB-TacrboEMgft5Y", authDomain: "mobile-shop-1c315.firebaseapp.com", projectId: "mobile-shop-1c315", storageBucket: "mobile-shop-1c315.firebasestorage.app", messagingSenderId: "689278786227", appId: "1:689278786227:web:ee06565e4a230381bf6ec6", measurementId: "G-MLDEWBBEMV"
+    };
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const productsCol = collection(db, 'products'); // Products collection eka gaththa
+    const ordersCol = collection(db, 'orders');     // Orders collection (modal ekata)
+
+    // Header & Modal DOM Elements (index.html eken gaththa)
+    const authModal = document.getElementById('auth-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const loginBtnNav = document.getElementById('login-btn-nav');
+    const signupBtnNav = document.getElementById('signup-btn-nav');
+    const logoutBtnNav = document.getElementById('logout-btn-nav');
+    const loginTab = document.getElementById('login-tab-btn');
+    const signupTab = document.getElementById('signup-tab-btn');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const authLinks = document.getElementById('auth-links');
+    const userInfo = document.getElementById('user-info');
+    const userEmailSpan = document.getElementById('user-email');
+    const trackingModal = document.getElementById('tracking-modal');
+    const closeTrackingBtn = document.getElementById('close-tracking-btn');
+    const trackingIconBtn = document.getElementById('tracking-icon-btn');
+    const trackingItemsContainer = document.getElementById('tracking-items-container'); 
+    const footerOrdersLink = document.getElementById('footer-orders-link');
+    const cartCountBadge = document.getElementById('cart-count-badge');
+    const wishlistCountBadge = document.getElementById('wishlist-count-badge');
+    
+    // *** SHOP PAGE DOM ELEMENTS ***
+    const shopProductGrid = document.getElementById('shop-product-grid');
+
+    let currentProducts = []; // Product data save karaganna array ekak
+
+    // --- Helper Functions (Cart & Wishlist - index.html eken gaththa) ---
+    const getCart = () => JSON.parse(localStorage.getItem('mobileHubCart')) || [];
+    const saveCart = (cart) => localStorage.setItem('mobileHubCart', JSON.stringify(cart));
+    const updateCartCountBadge = () => { /* ... (index.html eke code eka methana) ... */ }; // Full function eka copy karanna
+    
+    const getWishlist = () => JSON.parse(localStorage.getItem('mobileHubWishlist')) || [];
+    const saveWishlist = (wishlist) => localStorage.setItem('mobileHubWishlist', JSON.stringify(wishlist));
+    const updateWishlistCountBadge = () => { /* ... (index.html eke code eka methana) ... */ }; // Full function eka copy karanna
+    const addToWishlist = (productId) => { /* ... (index.html eke code eka methana) ... */ }; // Full function eka copy karanna
+
+    // *** Render Products Function (index.html eken copy kala) ***
+    // (Meka tikak loku nisa man full code eka methana dan ne, eth oya index.html eken meka copy karala methanata daganna)
+    const renderProducts = (products, gridElementId) => {
+        const gridElement = document.getElementById(gridElementId);
+        if (!gridElement) { console.error(`Grid element with ID ${gridElementId} not found.`); return; }
+        if (!products || products.length === 0) { gridElement.innerHTML = `<p class="text-slate-500 col-span-full text-center py-10">No products found.</p>`; return; }
+        gridElement.innerHTML = products.map(p => {
+            let priceHTML = '';
+            let offerBadgeHTML = ''; // Offer badge ekath hadamu (optional)
+            let currentPrice = p.price;
+            let originalPriceForDisplay = p.originalPrice; // originalPrice thiyenawada balanna
+
+            // --- Offer logic (optional, index.html eken ganna puluwan) --- 
+            // const liveOffer = findOfferForProduct(p.id); // Me function ekath one wei
+            // ... offer logic code ...
+            
+            // --- Price Display Logic ---
+             if (originalPriceForDisplay && originalPriceForDisplay > currentPrice) {
+                 priceHTML = `
+                     <p class="font-bold text-amber-600 text-lg">Rs. ${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+                     <p class="text-sm text-gray-500 line-through">Rs. ${originalPriceForDisplay.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>`;
+                 // Offer badge logic (optional)
+             } else {
+                 priceHTML = `<p class="font-bold text-amber-600 text-lg">Rs. ${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>`;
+             }
+
+            const installmentPrice3x = (currentPrice / 3).toLocaleString('en-US', { minimumFractionDigits: 2 });
+            const installmentPrice4x = (currentPrice / 4).toLocaleString('en-US', { minimumFractionDigits: 2 });
+            const descriptionSnippet = p.description ? p.description.substring(0, 70) + (p.description.length > 70 ? '...' : '') : '';
+
+            return `
+            <div class="product-card bg-white rounded-lg relative group">
+                 ${offerBadgeHTML}
+                 <div class="product-image-container">
+                      <img src="${p.imageUrl || 'https://placehold.co/300x300?text=No+Image'}" alt="${p.name}" class="product-image" loading="lazy">
+                      <div class="action-icons">
+                          <a href="cart.html" title="Go to Cart"><i class="fas fa-shopping-cart"></i></a>
+                          <button class="search-by-category-btn" data-category="${p.category || 'all'}" title="Search by Category"><i class="fas fa-search"></i></button>
+                          <button class="compare-btn" title="Compare"><i class="fas fa-exchange-alt"></i></button>
+                          <button class="wishlist-btn" data-product-id="${p.id}" title="Add to Wishlist"><i class="fas fa-heart"></i></button> 
+                      </div>
+                 </div>
+                 <div class="product-info-area">
+                      <h3 class="product-name font-semibold text-sm text-gray-700">${p.name}</h3>
+                      <p class="product-description-snippet">${descriptionSnippet}</p>
+                      <div class="price-section">${priceHTML}</div>
+                      <div class="installment-info text-xs text-gray-500 mt-1 space-y-1">
+                           <p>or 3X <span class="font-semibold text-gray-700">Rs. ${installmentPrice3x}</span> with <span class="font-bold" style="color: #00b8a9;">koko</span> <i class="fas fa-info-circle text-gray-400 text-xs"></i></p>
+                           <p>or up to 4X <span class="font-semibold text-gray-700">Rs. ${installmentPrice4x}</span> with <span class="font-bold" style="color: #1ed760;">mintpay</span></p>
+                      </div>
+                 </div>
+            </div>`;
+        }).join('');
+    };
+    
+    // --- Header & Auth Logic (index.html eken gaththa) ---
+    const openModal = (isLogin = true) => { /* ... */ }; if(loginBtnNav) loginBtnNav.addEventListener('click', () => openModal(true)); /* ... (Anith auth modal code okkoma methana) ... */
+    if(loginForm) loginForm.addEventListener('submit', async (e) => { /* ... */ }); if(signupForm) signupForm.addEventListener('submit', async (e) => { /* ... */ }); 
+    if(logoutBtnNav) logoutBtnNav.addEventListener('click', () => { signOut(auth).then(() => { window.location.href = 'index.html'; }); }); // Logout unama index ekata redirect karanawa
+    
+    // Auth State Change Listener (Header update karanna)
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            if(authLinks) { authLinks.classList.add('hidden'); authLinks.classList.remove('md:block'); }
+            if(userInfo) { userInfo.classList.remove('hidden'); userInfo.classList.add('flex'); }
+            if(userEmailSpan) userEmailSpan.textContent = user.email;
+        } else {
+            if(authLinks) { authLinks.classList.remove('hidden'); authLinks.classList.add('md:block'); }
+            if(userInfo) { userInfo.classList.add('hidden'); userInfo.classList.remove('flex'); }
+            if(userEmailSpan) userEmailSpan.textContent = '';
+        }
+        updateCartCountBadge();
+        updateWishlistCountBadge();
+    });
+
+    // Orders Modal Load Function (index.html eken gaththa)
+    const loadUserOrders = async () => { /* ... (index.html eke code eka methana) ... */ }; // Full function eka copy karanna
+    if(trackingIconBtn) trackingIconBtn.addEventListener('click', (e) => { e.preventDefault(); if(trackingModal) trackingModal.classList.remove('hidden'); loadUserOrders(); }); 
+    if(closeTrackingBtn) closeTrackingBtn.addEventListener('click', () => { if(trackingModal) trackingModal.classList.add('hidden'); }); 
+    if(footerOrdersLink) { footerOrdersLink.addEventListener('click', (e) => { e.preventDefault(); if(trackingModal) trackingModal.classList.remove('hidden'); loadUserOrders(); }); }
+
+
+    // --- Shop Page Specific Logic ---
+
+    // Load All Products from Firestore
+    const loadAllProducts = () => {
+        const q = query(productsCol, orderBy("createdAt", "desc")); // Get all products, ordered by creation date
+        
+        onSnapshot(q, (snapshot) => {
+            currentProducts = snapshot.docs.map(doc => {
+                 const data = doc.data();
+                 return { 
+                     id: doc.id, 
+                     ...data,
+                     price: parseFloat(data.price) || 0, 
+                     originalPrice: parseFloat(data.originalPrice) || parseFloat(data.price) || 0 
+                 };
+            });
+            renderProducts(currentProducts, 'shop-product-grid'); // Render them in the shop grid
+           }, (error) => {
+            console.error("Error fetching products: ", error);
+            if (shopProductGrid) shopProductGrid.innerHTML = '<p class="text-red-500 col-span-full text-center">Error loading products.</p>';
+           });
+    };
+
+    // Wishlist Button Click Listener (Shop page ekata)
+    document.addEventListener('click', (e) => {
+       if (e.target.closest('.wishlist-btn')) {
+           const button = e.target.closest('.wishlist-btn');
+           const productId = button.dataset.productId;
+           if (productId) {
+                addToWishlist(productId); 
+           } else {
+               console.error("Product ID not found on wishlist button.");
+           }
+           return; 
+       }
+       // Product Card Click (Go to product.html) - index.html eken gaththa
+       const productCardDiv = e.target.closest('.product-card');
+       if (productCardDiv && !e.target.closest('.action-icons button, .action-icons a')) {
+            const buttonWithId = productCardDiv.querySelector('[data-product-id]'); 
+            if (buttonWithId) {
+                 const productId = buttonWithId.dataset.productId;
+                 if (productId) { window.location.href = `product.html?id=${productId}`; } 
+                 else { console.error("Could not find product ID on product card."); }
+            } else { console.error("Could not find an element with data-product-id inside the product card."); }
+            return;
+        }
+    });
+
+    // Initial Load Functions
+    updateCartCountBadge();
+    updateWishlistCountBadge();
+    loadAllProducts(); // Shop page load weddi products load karanna
+
+</script>
+
+</body>
+</html>

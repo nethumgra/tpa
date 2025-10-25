@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - TPA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .modal-bg { background-color: rgba(0,0,0,0.5); }
+        .tab-button.active { border-color: #eab308; color: #eab308; }
+        .header-top-bar { background-color: #eab308; }
+        .main-nav { background-color: #f3f4f6; border-bottom: 1px solid #e5e7eb; }
+        .site-footer { background-color: #f8f8f8; color: #555; font-size: 0.875rem; }
+        .site-footer h4 { font-weight: 600; color: #333; margin-bottom: 1rem; text-transform: uppercase; }
+        .site-footer a { color: #555; transition: color 0.2s ease; }
+        .site-footer a:hover { color: #d97706; }
+        .footer-bottom { background-color: #eee; color: #666; font-size: 0.75rem; }
+        .footer-bottom .fa-cc-visa { color: #1A1F71; }
+        .footer-bottom .fa-cc-amex { color: #007BC1; }
+        .footer-bottom .fa-cc-paypal { color: #003087; }
+        .footer-bottom .fa-cc-mastercard { color: #EB001B; }
+        .footer-bottom .fa-cc-discover { color: #FF6600; }
+        
+        /* Profile Page Specific Styles */
+        .profile-pic-container { position: relative; width: 150px; height: 150px; }
+        .profile-pic { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .profile-pic-upload-btn { position: absolute; bottom: 5px; right: 5px; background-color: #eab308; color: white; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid white; transition: all 0.2s ease; }
+        .profile-pic-upload-btn:hover { background-color: #d97706; transform: scale(1.1); }
+        #profile-pic-input { display: none; }
+        .loading-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #eab308; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        .pop { animation: pop 0.2s ease-out; }
+
+        /* Dashboard Styles */
+        .sidebar-link { display: block; padding: 12px 16px; font-size: 0.9rem; font-weight: 500; color: #374151; border-bottom: 1px solid #f3f4f6; transition: all 0.2s ease; }
+        .sidebar-link:hover { background-color: #f9fafb; color: #d97706; padding-left: 20px; }
+        .sidebar-link.active { background-color: #f3f4f6; color: #1f2937; border-left: 4px solid #eab308; padding-left: 16px; font-weight: 600; }
+        .dashboard-card { display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem 1rem; text-align: center; color: #4b5563; transition: all 0.2s ease; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05); }
+        .dashboard-card:hover { border-color: #eab308; box-shadow: 0 4px 12px 0 rgba(0,0,0,0.08); color: #d97706; transform: translateY(-2px); }
+        .dashboard-card i { font-size: 2.5rem; margin-bottom: 0.75rem; color: #9ca3af; }
+        .dashboard-card:hover i { color: #eab308; }
+        .dashboard-card p { font-weight: 600; font-size: 0.9rem; }
+
+        /* ALUTH ADDRESS CARD STYLE */
+        .address-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        .address-card.is-default {
+            border-color: #eab308;
+            box-shadow: 0 4px 10px rgba(234,179,8,0.1);
+        }
+        .address-card .default-badge {
+            position: absolute;
+            top: -1px;
+            right: 1.5rem;
+            background-color: #eab308;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 0 0 0.375rem 0.375rem;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div id="auth-modal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center hidden"> <div class="bg-white rounded-lg shadow-xl w-full max-w-md m-4"> <div class="p-4 border-b"> <div class="flex justify-between items-center"> <h2 class="text-xl font-bold text-slate-700">Welcome!</h2> <button id="close-modal-btn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button> </div> </div> <div class="p-2 bg-slate-100 flex gap-2"> <button id="login-tab-btn" class="tab-button active flex-1 bg-white p-2 rounded-md font-semibold border-b-2">Login</button> <button id="signup-tab-btn" class="tab-button flex-1 bg-white p-2 rounded-md font-semibold text-slate-500 border-b-2 border-transparent">Sign Up</button> </div> <div class="p-6" style="max-height: 70vh; overflow-y: auto;"> <form id="login-form" class="space-y-4"> <input type="email" id="login-email" placeholder="Email" required class="w-full p-3 border rounded-md"> <input type="password" id="login-password" placeholder="Password" required class="w-full p-3 border rounded-md"> <button type="submit" class="w-full bg-amber-600 text-white p-3 rounded-md hover:bg-amber-700">Login</button> <p id="login-error" class="text-red-500 text-sm text-center"></p> </form> <form id="signup-form" class="space-y-4 hidden"> <input type="text" id="signup-name" placeholder="Full Name" required class="w-full p-3 border rounded-md"> <input type="email" id="signup-email" placeholder="Email" required class="w-full p-3 border rounded-md"> <input type="password" id="signup-password" placeholder="Password" required class="w-full p-3 border rounded-md"> <input type="tel" id="signup-phone" placeholder="Phone Number" required class="w-full p-3 border rounded-md"> <input type="text" id="signup-address" placeholder="Address" required class="w-full p-3 border rounded-md"> <div class="grid grid-cols-2 gap-4"> <input type="text" id="signup-city" placeholder="City" required class="w-full p-3 border rounded-md"> <input type="text" id="signup-district" placeholder="District" required class="w-full p-3 border rounded-md"> </div> <input type="text" id="signup-postal-code" placeholder="Postal Code" required class="w-full p-3 border rounded-md"> <button type="submit" class="w-full bg-amber-600 text-white p-3 rounded-md hover:bg-amber-700">Create Account</button> <p id="signup-error" class="text-red-500 text-sm text-center"></p> </form> </div> </div> </div>
+    
+    <div id="tracking-modal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center hidden"> <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl m-4" style="max-height: 90vh;"> <div class="p-6 flex justify-between items-center border-b"> <h2 class="text-3xl font-bold text-slate-800">My Orders</h2> <button id="close-tracking-btn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button> </div> <div id="tracking-items-container" class="p-6 flex flex-col" style="max-height: calc(90vh - 100px); overflow-y: auto;"> <p class="text-slate-500 text-center">Loading your orders...</p> </div> </div> </div>
+
+    <div id="address-modal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg m-4">
+            <div class="p-4 border-b">
+                <div class="flex justify-between items-center">
+                    <h2 id="address-form-title" class="text-xl font-bold text-slate-700">Add New Address</h2>
+                    <button id="close-address-modal-btn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button>
+                </div>
+            </div>
+            <div class="p-6" style="max-height: 70vh; overflow-y: auto;">
+                <form id="address-form" class="space-y-4">
+                    <input type="hidden" id="address-edit-id">
+                    <div>
+                        <label for="address-name" class="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
+                        <input type="text" id="address-name" placeholder="Recipient's Name" required class="w-full p-3 border rounded-md">
+                    </div>
+                    <div>
+                        <label for="address-phone" class="block text-sm font-medium text-gray-600 mb-1">Phone Number</label>
+                        <input type="tel" id="address-phone" placeholder="Recipient's Phone" required class="w-full p-3 border rounded-md">
+                    </div>
+                    <div>
+                        <label for="address-line" class="block text-sm font-medium text-gray-600 mb-1">Address Line</label>
+                        <input type="text" id="address-line" placeholder="Street Address, House No." required class="w-full p-3 border rounded-md">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" id="address-city" placeholder="City" required class="w-full p-3 border rounded-md">
+                        <input type="text" id="address-district" placeholder="District" required class="w-full p-3 border rounded-md">
+                    </div>
+                    <input type="text" id="address-postal-code" placeholder="Postal Code" required class="w-full p-3 border rounded-md">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="address-is-default" class="h-4 w-4 text-amber-600 border-gray-300 rounded focus:ring-amber-500">
+                        <label for="address-is-default" class="ml-2 block text-sm text-gray-700">Set as default shipping address</label>
+                    </div>
+                    
+                    <p id="address-form-error" class="text-red-500 text-sm text-center"></p>
+
+                    <div class="flex gap-4 pt-4">
+                        <button type="submit" id="address-save-btn" class="w-full bg-amber-600 text-white p-3 rounded-md hover:bg-amber-700">SAVE ADDRESS</button>
+                        <button type="button" id="delete-address-btn" class="w-1/3 bg-red-600 text-white p-3 rounded-md hover:bg-red-700 hidden">DELETE</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+     <header class="sticky top-0 z-40 bg-white shadow-md">
+          <div class="header-top-bar text-white text-xs py-1"> <div class="container mx-auto px-4 flex justify-between items-center"> <span>Your Ultimate Destination</span> <div class="flex items-center space-x-4"> <a href="#" class="hover:text-gray-300"><i class="fab fa-facebook-f"></i></a> <a href="#" class="hover:text-gray-300"><i class="fab fa-instagram"></i></a> <a href="#" class="hover:text-gray-300"><i class="fab fa-whatsapp"></i></a> <span class="border-l border-amber-400 h-4"></span> <a href="#" class="hover:underline">NEWSLETTER</a> <a href="#" class="hover:underline">CONTACT US</a> <a href="#" class="hover:underline">FAQS</a> </div> </div> </div> <div class="py-4 border-b"> <div class="container mx-auto px-4 flex justify-between items-center gap-6"> <a href="index.html" id="logo-btn" class="flex-shrink-0">
+                   <img src="LOGO.png" alt="TPA - The Phone Arcade" class="h-10 md:h-12">
+                   </a> <div class="flex-grow flex border border-gray-300 rounded-md overflow-hidden"> <input type="text" id="search-bar" placeholder="Search for products" class="w-full px-4 py-2 focus:outline-none text-sm">
+                   <select id="search-category-dropdown" class="border-l border-gray-300 px-2 text-sm text-gray-600 focus:outline-none bg-gray-50 hidden md:block">
+                        <option value="all">ALL CATEGORIES</option>
+                   </select>
+                   <button id="search-icon-btn" class="bg-gray-100 px-4 text-gray-600 hover:bg-gray-200"> <i class="fas fa-search"></i> </button> </div> <div class="flex items-center space-x-3 md:space-x-4 text-gray-700"> <div id="auth-links" class="text-sm hidden md:block"> <button id="login-btn-nav" class="hover:text-amber-700">LOGIN</button> / <button id="signup-btn-nav" class="hover:text-amber-700">REGISTER</button> </div>
+                    
+                    <div id="user-info" class="hidden items-center space-x-3 text-sm">
+                        <a href="profile.html" class="flex items-center gap-2 hover:text-amber-700 p-1 rounded-md">
+                            <i class="fas fa-user-circle text-2xl text-gray-500"></i>
+                            <span id="user-email" class="hidden lg:inline font-medium text-gray-700"></span>
+                        </a>
+                        <span class="border-l h-5 self-center"></span>
+                        <button id="logout-btn-nav" class="hover:text-red-600 text-gray-600 text-xs font-medium uppercase tracking-wider hover:bg-gray-100 p-2 rounded-md">Logout</button>
+                    </div>
+
+                    <span class="border-l h-5 self-center hidden md:block"></span> 
+                    
+                    <a href="wishlist.html" title="Wishlist" class="relative hover:text-amber-700"> 
+                        <i class="fas fa-heart text-xl"></i> 
+                        <span id="wishlist-count-badge" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> 
+                    </a> 
+                    
+                    <a href="#" title="Compare" class="relative hover:text-amber-700 hidden md:block"> <i class="fas fa-exchange-alt text-xl"></i> <span class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> </a> <a href="cart.html" id="cart-icon" title="Cart" class="relative hover:text-amber-700 flex items-center"> <i class="fas fa-shopping-bag text-xl"></i> <span id="cart-count-badge" class="absolute -top-1 -right-2 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> <span class="ml-2 text-sm font-semibold hidden md:inline">Rs.0.00</span> </a> <button id="tracking-icon-btn" title="Track My Orders" class="relative hover:text-amber-700"> <i class="fas fa-clipboard-list text-xl"></i> </button> </div> </div> </div> <nav class="main-nav hidden md:block"> <div class="container mx-auto px-4 flex justify-between items-center h-12"> <div class="flex space-x-6 text-sm font-medium"> <a href="index.html" class="text-gray-700 hover:text-amber-700">HOME</a> <a href="#" class="text-gray-700 hover:text-amber-700">SHOP</a> <a href="#" class="text-gray-700 hover:text-amber-700">ABOUT US</a> <a href="#" class="text-gray-700 hover:text-amber-700">CONTACT US</a> <a href="#" class="text-gray-700 hover:text-amber-700">STORE</a> </div> <a href="#" class="text-amber-600 font-semibold text-sm flex items-center gap-1 hover:text-gray-900"> <i class="fas fa-heart text-xs"></i> SPECIAL OFFERS </a> </div> </nav>
+     </header>
+
+     <main class="container mx-auto p-4 md:p-8">
+
+         <div id="login-prompt" class="bg-white rounded-lg shadow-xl p-12 max-w-lg mx-auto text-center hidden">
+             <h2 class="text-2xl font-bold text-gray-800 mb-4">Please Log In</h2>
+             <p class="text-gray-600 mb-6">You need to be logged in to view your account dashboard.</p>
+             <button id="login-prompt-btn" class="bg-amber-600 text-white px-8 py-3 rounded-md hover:bg-amber-700 font-bold">
+                 LOGIN NOW
+             </button>
+         </div>
+
+         <div id="account-container" class="hidden">
+             
+             <h2 class="text-2xl font-bold text-gray-800 mb-6 uppercase tracking-wide">My Account</h2>
+             
+             <div class="flex flex-col md:flex-row gap-8">
+                 
+                 <aside class="w-full md:w-1/4 self-start">
+                     <nav id="profile-sidebar" class="bg-white rounded-lg shadow-md overflow-hidden">
+                         <a href="#" class="sidebar-link active" data-view="dashboard">Dashboard</a>
+                         <a href="#" class="sidebar-link" data-view="orders">Orders</a>
+                         <a href="#" class="sidebar-link" data-view="downloads">Downloads</a>
+                         <a href="#" class="sidebar-link" data-view="addresses">Addresses</a>
+                         <a href="#" class="sidebar-link" data-view="account-details">Account details</a>
+                         <a href="#" class="sidebar-link" data-view="wishlist">Wishlist</a>
+                         <a href="#" class="sidebar-link" data-view="logout">Logout</a>
+                     </nav>
+                 </aside>
+
+                 <div class="flex-1 bg-white rounded-lg shadow-md p-6 md:p-8">
+
+                     <div id="profile-loading" class="text-center p-12">
+                         <div class="loading-spinner mx-auto"></div>
+                         <p class="mt-4 text-gray-600">Loading your profile...</p>
+                     </div>
+
+                     <div id="dashboard-view" class="account-view hidden">
+                         <div id="profile-notification" class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6 hidden">
+                             <h4 class="font-bold">Complete Your Profile!</h4>
+                             <p>We noticed some of your details are missing. Please fill out the form below to complete your profile.</p>
+                         </div>
+
+                         <div class="mb-6">
+                             <p id="welcome-message" class="text-gray-700 text-lg">Loading...</p>
+                             <p class="text-gray-600 mt-2 text-sm">From your account dashboard you can view your recent orders, manage your shipping and billing addresses, and edit your password and account details.</p>
+                         </div>
+
+                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                             <a href="#" class="dashboard-card" data-view="orders"> <i class="fas fa-file-invoice"></i> <p>Orders</p> </a>
+                             <a href="#" class="dashboard-card" data-view="downloads"> <i class="fas fa-download"></i> <p>Downloads</p> </a>
+                             <a href="#" class="dashboard-card" data-view="addresses"> <i class="fas fa-map-marker-alt"></i> <p>Addresses</p> </a>
+                             <a href="#" class="dashboard-card" data-view="account-details"> <i class="fas fa-user-circle"></i> <p>Account details</p> </a>
+                             <a href="#" class="dashboard-card" data-view="wishlist"> <i class="fas fa-heart"></i> <p>Wishlist</p> </a>
+                             <a href="#" class="dashboard-card" data-view="logout"> <i class="fas fa-sign-out-alt"></i> <p>Logout</p> </a>
+                         </div>
+                     </div>
+
+                     <div id="orders-view" class="account-view hidden">
+                         <div class="mb-6 pb-4 border-b">
+                             <h3 class="text-2xl font-bold text-gray-800">My Orders</h3>
+                             <p class="text-gray-600 text-sm">View your recent order history.</p>
+                         </div>
+                         <div id="orders-list-container" class="space-y-4">
+                             <p class="text-slate-500 text-center">Loading your orders...</p>
+                         </div>
+                     </div>
+
+                     <div id="addresses-view" class="account-view hidden">
+                        <div class="flex justify-between items-center mb-6 pb-4 border-b">
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-800">My Addresses</h3>
+                                <p class="text-gray-600 text-sm">Manage your shipping addresses.</p>
+                            </div>
+                            <button id="add-new-address-btn" class="bg-amber-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-amber-700">
+                                <i class="fas fa-plus mr-1"></i> Add New
+                            </button>
+                        </div>
+                        <div id="addresses-list-container" class="space-y-4">
+                            <p class="text-slate-500 text-center">Loading your addresses...</p>
+                        </div>
+                     </div>
+                     
+                     <div id="account-details-view" class="account-view hidden">
+                         <div class="mb-6 pb-4 border-b">
+                             <h3 class="text-2xl font-bold text-gray-800">Account Details</h3>
+                             <p class="text-gray-600 text-sm">Manage your personal information.</p>
+                         </div>
+
+                         <div class="flex flex-col md:flex-row gap-8 items-start">
+                             <div class="w-full md:w-1/3 flex flex-col items-center">
+                                 <div class="profile-pic-container mb-4">
+                                     <img id="profile-pic-img" src="https://via.placeholder.com/150" alt="Profile Picture" class="profile-pic">
+                                     <label for="profile-pic-input" class="profile-pic-upload-btn" title="Upload new image">
+                                         <i class="fas fa-camera"></i>
+                                     </label>
+                                     <input type="file" id="profile-pic-input" accept="image/*">
+                                 </div>
+                                 <p id="pic-upload-status" class="text-sm text-center text-gray-500"></p>
+                             </div>
+ 
+                             <div class="w-full md:w-2/3">
+                                 <form id="profile-details-form" class="space-y-4">
+                                     <div>
+                                         <label for="profile-name" class="block text-sm font-medium text-gray-600 mb-1">Full Name</label>
+                                         <input type="text" id="profile-name" class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                                     </div>
+                                     <div>
+                                         <label for="profile-email" class="block text-sm font-medium text-gray-600 mb-1">Email Address</label>
+                                         <input type="email" id="profile-email" class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500 bg-gray-100" disabled>
+                                     </div>
+                                     <div>
+                                         <label for="profile-phone" class="block text-sm font-medium text-gray-600 mb-1">Phone Number</label>
+                                         <input type="tel" id="profile-phone" class="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                                     </div>
+
+                                     <div>
+                                        <label for="profile-whatsapp" class="block text-sm font-medium text-gray-600 mb-1">WhatsApp Number</label>
+                                        <div class="flex gap-2">
+                                            <input type="tel" id="profile-whatsapp" placeholder="e.g., 0771234567" class="flex-grow w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                            <button type="button" id="verify-whatsapp-btn" class="flex-shrink-0 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 text-sm font-semibold w-28 text-center transition-colors duration-200">
+                                                <span class="btn-text" id="verify-btn-text"><i class="fab fa-whatsapp mr-1"></i> Verify</span>
+                                                <span class="btn-loader hidden" id="verify-btn-loader"><i class="fas fa-spinner fa-spin"></i></span>
+                                            </button>
+                                        </div>
+                                        <p id="whatsapp-status-text" class="text-xs text-gray-500 mt-1 transition-colors duration-200">Number eka enter karala verify click karanna.</p>
+                                     </div>
+                                     
+                                     <div class="pt-4">
+                                         <button type="submit" class="w-full bg-amber-600 text-white p-3 rounded-md hover:bg-amber-700 font-bold text-base">
+                                             SAVE CHANGES
+                                         </button>
+                                         <p id="form-status" class="text-green-600 text-sm text-center mt-2"></p>
+                                     </div>
+                                 </form>
+                             </div>
+                         </div>
+                     </div>
+                     
+                     <div id="wishlist-view" class="account-view hidden">
+                         <div class="mb-6 pb-4 border-b">
+                             <h3 class="text-2xl font-bold text-gray-800">My Wishlist</h3>
+                             <p class="text-gray-600 text-sm">Products you've saved for later.</p>
+                         </div>
+                         <div id="wishlist-container" class="divide-y divide-gray-200">
+                             <p class="text-center py-8 text-gray-500">Loading your wishlist...</p>
+                         </div>
+                     </div>
+                     
+                 </div>
+             </div>
+         </div>
+
+     </main>
+
+   <footer class="site-footer border-t pt-10 mt-10">
+          <div class="container mx-auto px-4 pb-10">
+               <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div class="space-y-4">
+                         <img src="LOGO.png" alt="TPA - The Phone Arcade" class="h-10 mb-4">
+                         <p>High-quality electronics, essentials & appliances are now at your fingertips. Confirm your order now !</p>
+                         <p><i class="fas fa-map-marker-alt mr-2 text-amber-700"></i> 890/a Main Street, Kaduruwela, Polonnaruwa</p>
+                         <p><i class="fas fa-phone-alt mr-2 text-amber-700"></i> Phone: 077 754 9654 / 027 222 4470</p>
+                         <p><i class="fas fa-envelope mr-2 text-amber-700"></i> Email: info@buyzone.lk</p>
+                    </div>
+                    <div>
+                         <h4>Quick Links</h4>
+                         <ul class="space-y-2">
+                              <li><a href="index.html">Home</a></li>
+                              <li><a href="shop.html">Shop</a></li>
+                              <li><a href="about.html">About Us</a></li>
+                              <li><a href="contact.html">Contact Us</a></li>
+                              <li><a href="#">Special Offers</a></li>
+                         </ul>
+                    </div>
+                    <div>
+                         <h4>Useful Links</h4>
+                         <ul class="space-y-2">
+                              <li><a href="#">Privacy Policy</a></li>
+                              <li><a href="#">Returns</a></li>
+                              <li><a href="#">Terms & Conditions</a></li>
+                              <li><a href="#">Contact Us</a></li>
+                              <li><a href="#">Latest News</a></li>
+                              <li><a href="#">Our Sitemap</a></li>
+                         </ul>
+                    </div>
+                    <div>
+                         <h4>My Account</h4>
+                         <ul class="space-y-2">
+                              <li><a href="profile.html">My Profile</a></li>
+                              <li><a href="cart.html">View Cart</a></li>
+                              <li><a href="#" id="footer-orders-link">Track My Orders</a></li>
+                              <li><a href="wishlist.html">My Wishlist</a></li>
+                         </ul>
+                    </div>
+               </div>
+          </div>
+          <div class="footer-bottom py-4 px-4">
+               <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+                    <span>TPA © 2025 CREATED BY <a href="https://pixora.com" target="_blank" rel="noopener noreferrer" class="font-semibold hover:text-amber-700">PIXORA IT SOLUTIONS</a></span>
+                    <div class="flex space-x-2 mt-4 md:mt-0">
+                         <i class="fab fa-cc-visa text-2xl"></i>
+                         <i class="fab fa-cc-amex text-2xl"></i>
+                         <i class="fab fa-cc-paypal text-2xl"></i>
+                         <i class="fab fa-cc-mastercard text-2xl"></i>
+                         <i class="fab fa-cc-discover text-2xl"></i>
+                         </div>
+               </div>
+          </div>
+     </footer>
+
+     <script type="module">
+    
+    // Firebase Imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, query, where, orderBy, getDocs, addDoc, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    
+    // Firebase Config
+    const firebaseConfig = {
+     apiKey: "AIzaSyAtvnbedBpCiRe_ZyfoB-TacrboEMgft5Y", authDomain: "mobile-shop-1c315.firebaseapp.com", projectId: "mobile-shop-1c315", storageBucket: "mobile-shop-1c315.firebasestorage.app", messagingSenderId: "689278786227", appId: "1:689278786227:web:ee06565e4a230381bf6ec6", measurementId: "G-MLDEWBBEMV"
+    };
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const ordersCol = collection(db, 'orders'); 
+
+    // Header & Modal DOM Elements
+    const authModal = document.getElementById('auth-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const loginBtnNav = document.getElementById('login-btn-nav');
+    const signupBtnNav = document.getElementById('signup-btn-nav');
+    const logoutBtnNav = document.getElementById('logout-btn-nav');
+    const loginTab = document.getElementById('login-tab-btn');
+    const signupTab = document.getElementById('signup-tab-btn');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const authLinks = document.getElementById('auth-links');
+    const userInfo = document.getElementById('user-info');
+    const userEmailSpan = document.getElementById('user-email');
+    const trackingModal = document.getElementById('tracking-modal');
+    const closeTrackingBtn = document.getElementById('close-tracking-btn');
+    const trackingIconBtn = document.getElementById('tracking-icon-btn');
+    const trackingItemsContainer = document.getElementById('tracking-items-container'); 
+    const footerOrdersLink = document.getElementById('footer-orders-link');
+    const cartCountBadge = document.getElementById('cart-count-badge');
+    const wishlistCountBadge = document.getElementById('wishlist-count-badge');
+
+
+    // Profile Page DOM Elements
+    const accountContainer = document.getElementById('account-container');
+    const profileLoading = document.getElementById('profile-loading');
+    const loginPrompt = document.getElementById('login-prompt');
+    const loginPromptBtn = document.getElementById('login-prompt-btn');
+    const profileSidebar = document.getElementById('profile-sidebar');
+    const allAccountViews = document.querySelectorAll('.account-view');
+    const welcomeMessage = document.getElementById('welcome-message');
+    const profileNotification = document.getElementById('profile-notification');
+    
+    // View Containers
+    const dashboardView = document.getElementById('dashboard-view');
+    const ordersView = document.getElementById('orders-view');
+    const addressesView = document.getElementById('addresses-view');
+    const accountDetailsView = document.getElementById('account-details-view');
+    const wishlistView = document.getElementById('wishlist-view');
+
+    // Orders
+    const ordersListContainer = document.getElementById('orders-list-container');
+    
+    // Wishlist
+    const wishlistContainer = document.getElementById('wishlist-container');
+    
+    // Account Details
+    const profilePicImg = document.getElementById('profile-pic-img');
+    const profilePicInput = document.getElementById('profile-pic-input');
+    const picUploadStatus = document.getElementById('pic-upload-status');
+    const profileDetailsForm = document.getElementById('profile-details-form');
+    const formStatus = document.getElementById('form-status');
+    const verifyWhatsAppBtn = document.getElementById('verify-whatsapp-btn');
+    const whatsAppInput = document.getElementById('profile-whatsapp'); 
+    const whatsappStatusText = document.getElementById('whatsapp-status-text'); 
+    const verifyBtnText = document.getElementById('verify-btn-text'); 
+    const verifyBtnLoader = document.getElementById('verify-btn-loader'); 
+
+    // Address DOM Elements
+    const addressModal = document.getElementById('address-modal');
+    const closeAddressModalBtn = document.getElementById('close-address-modal-btn');
+    const addNewAddressBtn = document.getElementById('add-new-address-btn');
+    const addressesListContainer = document.getElementById('addresses-list-container');
+    const addressForm = document.getElementById('address-form');
+    const addressFormTitle = document.getElementById('address-form-title');
+    const addressEditId = document.getElementById('address-edit-id');
+    const addressName = document.getElementById('address-name');
+    const addressPhone = document.getElementById('address-phone');
+    const addressLine = document.getElementById('address-line');
+    const addressCity = document.getElementById('address-city');
+    const addressDistrict = document.getElementById('address-district');
+    const addressPostalCode = document.getElementById('address-postal-code');
+    const addressIsDefault = document.getElementById('address-is-default');
+    const addressFormError = document.getElementById('address-form-error');
+    const deleteAddressBtn = document.getElementById('delete-address-btn');
+
+
+    let currentUser = null; 
+    let currentUserDocRef = null; 
+
+    // --- Header & Auth Logic ---
+
+    const openModal = (isLogin = true) => { if(authModal) authModal.classList.remove('hidden'); if(isLogin){ if(loginTab) loginTab.click(); } else { if(signupTab) signupTab.click(); } }; if(loginBtnNav) loginBtnNav.addEventListener('click', () => openModal(true)); if(signupBtnNav) signupBtnNav.addEventListener('click', () => openModal(false)); if(closeModalBtn) closeModalBtn.addEventListener('click', () => {if(authModal) authModal.classList.add('hidden');}); if(loginTab) loginTab.addEventListener('click', () => { loginTab.classList.add('active'); if(signupTab) signupTab.classList.remove('active'); if(loginForm) loginForm.classList.remove('hidden'); if(signupForm) signupForm.classList.add('hidden'); }); if(signupTab) signupTab.addEventListener('click', () => { signupTab.classList.add('active'); if(loginTab) loginTab.classList.remove('active'); if(signupForm) signupForm.classList.remove('hidden'); if(loginForm) loginForm.classList.add('hidden'); });
+    if(loginForm) loginForm.addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('login-email').value; const password = document.getElementById('login-password').value; const errorP = document.getElementById('login-error'); if(errorP) errorP.textContent = ''; try { await signInWithEmailAndPassword(auth, email, password); } catch (error) { console.error("Login Error:", error); if(errorP) errorP.textContent = error.message; } }); if(signupForm) signupForm.addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('signup-email').value; const password = document.getElementById('signup-password').value; const name = document.getElementById('signup-name').value; const phone = document.getElementById('signup-phone').value; const address = document.getElementById('signup-address').value; const city = document.getElementById('signup-city').value; const district = document.getElementById('signup-district').value; const postalCode = document.getElementById('signup-postal-code').value; const errorP = document.getElementById('signup-error'); if(errorP) errorP.textContent = ''; try { const userCredential = await createUserWithEmailAndPassword(auth, email, password); const user = userCredential.user; const userDocRef = doc(db, "users", user.uid); await setDoc(userDocRef, { name: name, email: email, phone: phone, createdAt: serverTimestamp(), role: "customer" }); await addDoc(collection(userDocRef, "addresses"), { name: name, phone: phone, address: address, city: city, district: district, postalCode: postalCode, isDefault: true }); } catch (error) { console.error("Signup Error:", error); if(errorP) errorP.textContent = error.message; } }); 
+    if(logoutBtnNav) logoutBtnNav.addEventListener('click', () => { signOut(auth).then(() => { window.location.href = 'index.html'; }); });
+    if(trackingIconBtn) trackingIconBtn.addEventListener('click', (e) => { e.preventDefault(); if(trackingModal) trackingModal.classList.remove('hidden'); loadUserOrders(); }); 
+    if(closeTrackingBtn) closeTrackingBtn.addEventListener('click', () => { if(trackingModal) trackingModal.classList.add('hidden'); }); 
+    if(footerOrdersLink) { footerOrdersLink.addEventListener('click', (e) => { e.preventDefault(); if(trackingModal) trackingModal.classList.remove('hidden'); loadUserOrders(); }); }
+    if(loginPromptBtn) loginPromptBtn.addEventListener('click', () => openModal(true));
+
+
+    // --- Profile Page Specific Logic ---
+    
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            currentUserDocRef = doc(db, "users", user.uid);
+            
+            if(authLinks) { authLinks.classList.add('hidden'); authLinks.classList.remove('md:block'); }
+            if(userInfo) { userInfo.classList.remove('hidden'); userInfo.classList.add('flex'); }
+            if(userEmailSpan) userEmailSpan.textContent = user.email;
+            
+            if(loginPrompt) loginPrompt.classList.add('hidden');
+            if(accountContainer) accountContainer.classList.remove('hidden');
+            await loadUserProfile();
+            showView('dashboard'); 
+
+        } else {
+            currentUser = null;
+            currentUserDocRef = null;
+            
+            if(authLinks) { authLinks.classList.remove('hidden'); authLinks.classList.add('md:block'); }
+            if(userInfo) { userInfo.classList.add('hidden'); userInfo.classList.remove('flex'); }
+            if(userEmailSpan) userEmailSpan.textContent = '';
+            
+            if(accountContainer) accountContainer.classList.add('hidden');
+            if(loginPrompt) loginPrompt.classList.remove('hidden');
+        }
+    });
+
+    function showView(viewName) {
+        profileSidebar.querySelectorAll('.sidebar-link').forEach(link => {
+            if (link.dataset.view === viewName) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        allAccountViews.forEach(view => {
+            if (view.id === `${viewName}-view`) {
+                view.classList.remove('hidden');
+            } else {
+                view.classList.add('hidden');
+            }
+        });
+    }
+
+    // Modal eka load karana function eka (WENAS KALA)
+    const loadUserOrders = async () => { 
+        if(!trackingItemsContainer) return; 
+        trackingItemsContainer.innerHTML = '<p class="text-slate-500 text-center">Loading your orders...</p>'; 
+        const user = auth.currentUser; 
+        if (!user) { 
+            trackingItemsContainer.innerHTML = ` <div class="text-center p-8"> <h3 class="text-xl font-semibold text-slate-700 mb-4">Please Log In</h3> <p class="text-slate-500 mb-6">You need to be logged in to view your order history.</p> <button id="tracking-login-btn" class="bg-amber-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-amber-700">Login Now</button> </div>`; 
+            const trackingLoginBtn = document.getElementById('tracking-login-btn'); 
+            if (trackingLoginBtn) { 
+                trackingLoginBtn.addEventListener('click', () => { 
+                    if(trackingModal) trackingModal.classList.add('hidden'); 
+                    openModal(true); 
+                }); 
+            } 
+            return; 
+        } 
+        try { 
+            const q = query(ordersCol, where("userId", "==", user.uid), orderBy("createdAt", "desc")); 
+            const querySnapshot = await getDocs(q); 
+            if (querySnapshot.empty) { 
+                trackingItemsContainer.innerHTML = ` <div class="text-center p-8"> <h3 class="text-xl font-semibold text-slate-700 mb-4">No Orders Found</h3> <p class="text-slate-500">You haven't placed any orders with us yet.</p> </div>`; 
+                return; 
+            } 
+            
+            trackingItemsContainer.innerHTML = querySnapshot.docs.map(doc => { 
+                const order = doc.data() || {}; 
+                const orderId = doc.id; 
+                const createdDate = order.createdAt ? order.createdAt.toDate().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A'; 
+                
+                // *** METHANA WENAS KALA ***
+                const itemsHtml = (order.items || []).map(item => `
+                    <div class="flex items-center gap-3 py-2 border-b last:border-b-0 border-slate-200">
+                        <img src="${item.imageUrl || 'https://via.placeholder.com/60'}" alt="${item.name || 'Item'}" class="w-12 h-12 object-contain rounded border p-1 bg-white">
+                        <div>
+                            <p class="text-sm font-medium text-gray-700">${item.name || 'Item'}</p>
+                            <p class="text-xs text-gray-500">Quantity: ${item.quantity || 1}</p>
+                        </div>
+                    </div>
+                `).join('');
+                // *** WENAS KALA EKA IWARAI ***
+
+                let statusColor = 'bg-slate-100 text-slate-700'; 
+                const statusLower = (order.status || 'Pending').toLowerCase(); 
+                if (statusLower === 'pending') statusColor = 'bg-yellow-100 text-yellow-800'; 
+                else if (statusLower === 'shipped' || statusLower === 'processing') statusColor = 'bg-blue-100 text-blue-800'; 
+                else if (statusLower === 'delivered') statusColor = 'bg-green-100 text-green-800'; 
+                else if (statusLower === 'cancelled') statusColor = 'bg-red-100 text-red-800'; 
+                
+                // *** METHANA HTML EKA WENAS KALA ***
+                return ` 
+                <div class="bg-white border rounded-lg p-4 mb-4 shadow-sm"> 
+                    <div class="flex flex-col sm:flex-row justify-between items-start mb-3"> 
+                        <div> 
+                            <p class="text-xs text-slate-500">Order ID: ${orderId}</p> 
+                            <p class="font-bold text-lg text-slate-800">Total: Rs. ${(order.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p> 
+                        </div> 
+                        <span class="text-sm font-bold px-3 py-1 rounded-full ${statusColor} mt-2 sm:mt-0">${order.status || 'Pending'}</span> 
+                    </div> 
+                    <p class="text-sm text-slate-600 mb-2"><strong>Placed On:</strong> ${createdDate}</p> 
+                    
+                    <div class="mb-3">
+                        <p class="text-sm font-semibold text-slate-700 mb-1">Items:</p>
+                        <div class="space-y-1 pl-2">
+                            ${itemsHtml || '<p class="text-sm text-slate-500">No items found.</p>'}
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-50 p-3 rounded-md"> 
+                        <p class="text-sm font-semibold text-slate-700">Shipping to: ${order.customerInfo?.name || 'N/A'}</p> 
+                        <p class="text-xs text-slate-500">${order.customerInfo?.address || 'N/A'}, ${order.customerInfo?.city || ''}</p> 
+                    </div> 
+                </div>`; 
+                // *** HTML WENAS KALA EKA IWARAI ***
+            }).join(''); 
+        } catch (error) { 
+            console.error("Error fetching orders: ", error); 
+            trackingItemsContainer.innerHTML = '<p class="text-red-500 text-center">Could not load your orders. Please try again later.</p>'; 
+        } 
+    };
+
+    // Dashboard eke Orders view eka load karana eka (WENAS KALA)
+    const loadDashboardOrders = async () => { 
+        if(!ordersListContainer) return; 
+        ordersListContainer.innerHTML = '<p class="text-slate-500 text-center">Loading your orders...</p>'; 
+        const user = auth.currentUser; 
+        if (!user) { 
+            ordersListContainer.innerHTML = '<p class="text-red-500 text-center">You are not logged in.</p>';
+            return; 
+        } 
+        try { 
+            const q = query(ordersCol, where("userId", "==", user.uid), orderBy("createdAt", "desc")); 
+            const querySnapshot = await getDocs(q); 
+            if (querySnapshot.empty) { 
+                ordersListContainer.innerHTML = `
+                    <div class="text-center p-8 border rounded-md bg-slate-50"> 
+                        <h3 class="text-xl font-semibold text-slate-700 mb-4">No Orders Found</h3> 
+                        <p class="text-slate-500">You haven't placed any orders with us yet.</p> 
+                    </div>`; 
+                return; 
+            } 
+            
+            ordersListContainer.innerHTML = querySnapshot.docs.map(doc => { 
+                const order = doc.data() || {}; 
+                const orderId = doc.id; 
+                const createdDate = order.createdAt ? order.createdAt.toDate().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A'; 
+                
+                // *** METHANA WENAS KALA ***
+                const itemsHtml = (order.items || []).map(item => `
+                    <div class="flex items-center gap-3 py-2 border-b last:border-b-0 border-slate-200">
+                        <img src="${item.imageUrl || 'https://via.placeholder.com/60'}" alt="${item.name || 'Item'}" class="w-12 h-12 object-contain rounded border p-1 bg-white">
+                        <div>
+                            <p class="text-sm font-medium text-gray-700">${item.name || 'Item'}</p>
+                            <p class="text-xs text-gray-500">Quantity: ${item.quantity || 1}</p>
+                        </div>
+                    </div>
+                `).join('');
+                // *** WENAS KALA EKA IWARAI ***
+
+                let statusColor = 'bg-slate-100 text-slate-700'; 
+                const statusLower = (order.status || 'Pending').toLowerCase(); 
+                if (statusLower === 'pending') statusColor = 'bg-yellow-100 text-yellow-800'; 
+                else if (statusLower === 'shipped' || statusLower === 'processing') statusColor = 'bg-blue-100 text-blue-800'; 
+                else if (statusLower === 'delivered') statusColor = 'bg-green-100 text-green-800'; 
+                else if (statusLower === 'cancelled') statusColor = 'bg-red-100 text-red-800'; 
+                
+                // *** METHANA HTML EKA WENAS KALA ***
+                return ` 
+                <div class="bg-white border rounded-lg p-4 shadow-sm"> 
+                    <div class="flex flex-col sm:flex-row justify-between items-start mb-3"> 
+                        <div> 
+                            <p class="text-xs text-slate-500">Order ID: ${orderId}</p> 
+                            <p class="font-bold text-lg text-slate-800">Total: Rs. ${(order.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p> 
+                        </div> 
+                        <span class="text-sm font-bold px-3 py-1 rounded-full ${statusColor} mt-2 sm:mt-0">${order.status || 'Pending'}</span> 
+                    </div> 
+                    <p class="text-sm text-slate-600 mb-2"><strong>Placed On:</strong> ${createdDate}</p> 
+                    
+                    <div class="mb-3">
+                        <p class="text-sm font-semibold text-slate-700 mb-1">Items:</p>
+                        <div class="space-y-1 pl-2">
+                            ${itemsHtml || '<p class="text-sm text-slate-500">No items found.</p>'}
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-3 rounded-md"> 
+                        <p class="text-sm font-semibold text-slate-700">Shipping to: ${order.customerInfo?.name || 'N/A'}</p> 
+                        <p class="text-xs text-slate-500">${order.customerInfo?.address || 'N/A'}, ${order.customerInfo?.city || ''}</p> 
+                    </div> 
+                </div>`; 
+                // *** HTML WENAS KALA EKA IWARAI ***
+            }).join(''); 
+        } catch (error) { 
+            console.error("Error fetching orders: ", error); 
+            ordersListContainer.innerHTML = '<p class="text-red-500 text-center">Could not load your orders. Please try again later.</p>'; 
+        } 
+    };
+
+    
+    // --- WISHLIST LOGIC EKA ---
+    
+    const getCart = () => JSON.parse(localStorage.getItem('mobileHubCart')) || [];
+    const saveCart = (cart) => localStorage.setItem('mobileHubCart', JSON.stringify(cart));
+    const updateCartCountBadge = () => { const cart = getCart(); const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0); const cartTotalValue = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0); if (cartCountBadge) { if (totalItems > 0) { cartCountBadge.textContent = totalItems; cartCountBadge.classList.remove('hidden'); cartCountBadge.classList.add('pop'); setTimeout(() => cartCountBadge.classList.remove('pop'), 200); } else { cartCountBadge.textContent = '0'; cartCountBadge.classList.remove('hidden', 'pop'); } } const cartTotalText = document.querySelector('#cart-icon span.md\\:inline'); if (cartTotalText) { cartTotalText.textContent = `Rs.${cartTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`; } };
+    const getWishlist = () => JSON.parse(localStorage.getItem('mobileHubWishlist')) || [];
+    const saveWishlist = (wishlist) => localStorage.setItem('mobileHubWishlist', JSON.stringify(wishlist));
+    const updateWishlistCountBadge = () => {
+         const wishlist = getWishlist();
+         const totalItems = wishlist.length;
+         if (wishlistCountBadge) {
+             if (totalItems > 0) {
+                  wishlistCountBadge.textContent = totalItems;
+                  wishlistCountBadge.classList.remove('hidden');
+             } else {
+                  wishlistCountBadge.textContent = '0';
+             }
+             wishlistCountBadge.classList.add('pop');
+             setTimeout(() => wishlistCountBadge.classList.remove('pop'), 200);
+         }
+    };
+    const addToCartFromWishlist = (productId) => {
+         let cart = getCart();
+         let wishlist = getWishlist();
+         const product = wishlist.find(p => p.id === productId); 
+         if (!product) {
+             console.error("Product not found in wishlist!");
+             return;
+         }
+         const existingItem = cart.find(item => item.id === productId);
+         if (existingItem) {
+             existingItem.quantity++;
+         } else {
+             cart.push({ 
+                 id: product.id, 
+                 name: product.name, 
+                 price: product.price, 
+                 originalPrice: product.price,
+                 imageUrl: product.imageUrl, 
+                 quantity: 1 
+             });
+         }
+         saveCart(cart);
+         updateCartCountBadge();
+         alert(`${product.name} added to cart!`);
+    };
+    const renderWishlist = () => {
+        if (!wishlistContainer) return;
+        const wishlist = getWishlist();
+        if (wishlist.length === 0) {
+            wishlistContainer.innerHTML = `
+                <div class="text-center py-10">
+                    <i class="fas fa-heart text-4xl text-gray-400 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Your Wishlist is Empty</h3>
+                    <p class="text-gray-500 mb-6">You haven't added any products to your wishlist yet.</p>
+                    <a href="index.html" class="bg-amber-600 text-white px-6 py-2 rounded-md font-semibold hover:bg-amber-700">
+                        Start Shopping
+                    </a>
+                </div>`;
+            return;
+        }
+        wishlistContainer.innerHTML = wishlist.map(item => `
+            <div class="wishlist-item flex flex-col sm:flex-row items-center gap-4 py-4">
+                <button class="wishlist-remove-btn text-gray-400 hover:text-red-500 self-start sm:self-center" title="Remove" data-id="${item.id}">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+                <img src="${item.imageUrl || 'https://via.placeholder.com/80'}" alt="${item.name}" class="w-20 h-20 object-contain rounded border p-1">
+                <div class="flex-grow text-center sm:text-left">
+                    <h3 class="font-semibold text-gray-800">${item.name}</h3>
+                </div>
+                <p class="font-bold text-amber-600 w-full sm:w-32 text-center sm:text-right text-lg">
+                    Rs. ${item.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </p>
+                <button class="wishlist-add-to-cart-btn bg-amber-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-amber-700 w-full sm:w-auto" data-id="${item.id}">
+                    Add to Cart
+                </button>
+            </div>
+        `).join('');
+    };
+    // --- WISHLIST LOGIC EKA IWARAI ---
+
+
+    // Dashboard Navigation Click Events
+    accountContainer.addEventListener('click', (e) => {
+        const targetLink = e.target.closest('a[data-view], button[data-view]');
+        if (!targetLink) return;
+
+        e.preventDefault();
+        const viewName = targetLink.dataset.view;
+
+        switch (viewName) {
+            case 'dashboard':
+                showView('dashboard');
+                break;
+            case 'account-details':
+                showView('account-details');
+                break;
+            case 'addresses':
+                showView('addresses'); 
+                loadUserAddresses();
+                break;
+            case 'orders':
+                showView('orders');
+                loadDashboardOrders();
+                break;
+            case 'downloads':
+                alert('You have no downloadable products yet.');
+                break;
+            case 'wishlist':
+                showView('wishlist');
+                renderWishlist();
+                break;
+            case 'logout':
+                signOut(auth).then(() => { window.location.href = 'index.html'; });
+                break;
+        }
+    });
+
+    // Wishlist Container Click Events
+    if (wishlistContainer) {
+        wishlistContainer.addEventListener('click', (e) => {
+            if (e.target.closest('.wishlist-remove-btn')) {
+                const productId = e.target.closest('.wishlist-remove-btn').dataset.id;
+                if (confirm('Are you sure you want to remove this item from your wishlist?')) {
+                    let wishlist = getWishlist();
+                    wishlist = wishlist.filter(item => item.id !== productId);
+                    saveWishlist(wishlist);
+                    renderWishlist(); 
+                    updateWishlistCountBadge(); 
+                }
+            }
+            if (e.target.closest('.wishlist-add-to-cart-btn')) {
+                const productId = e.target.closest('.wishlist-add-to-cart-btn').dataset.id;
+                addToCartFromWishlist(productId);
+            }
+        });
+    }
+
+
+    // User Profile Load karana Function
+    async function loadUserProfile() {
+        if (!currentUserDocRef || !currentUser) return;
+        profileLoading.classList.remove('hidden');
+
+        try {
+            const userDoc = await getDoc(currentUserDocRef);
+            let userData = {}; 
+            let userName = currentUser.email.split('@')[0]; 
+
+            if (userDoc.exists()) {
+                userData = userDoc.data(); 
+                if (userData.name) {
+                    userName = userData.name.split(' ')[0]; 
+                }
+            } else {
+                console.warn("No user document found! Displaying blank form for new user.");
+            }
+
+            welcomeMessage.innerHTML = `Hello <strong>${userName}</strong> (not ${userName}? <a href="#" data-view="logout" class="text-amber-600 hover:underline">Log out</a>)`;
+            document.getElementById('profile-name').value = userData.name || '';
+            document.getElementById('profile-email').value = currentUser.email || ''; 
+            document.getElementById('profile-phone').value = userData.phone || '';
+            document.getElementById('profile-whatsapp').value = userData.whatsapp || ''; 
+            
+            if (userData.photoURL) {
+                profilePicImg.src = userData.photoURL;
+            } else {
+                profilePicImg.src = 'https://via.placeholder.com/150'; 
+            }
+
+            if (!userData.phone) {
+                if (profileNotification) profileNotification.classList.remove('hidden');
+            } else {
+                if (profileNotification) profileNotification.classList.add('hidden');
+            }
+            profileLoading.classList.add('hidden'); 
+
+        } catch (error) {
+            console.error("Error loading user profile:", error);
+            profileLoading.innerHTML = '<p class="text-red-500">Error loading profile. Please try again.</p>';
+        }
+    }
+
+
+    // WhatsApp Verify Button Logic
+    if (verifyWhatsAppBtn && whatsAppInput && whatsappStatusText && verifyBtnText && verifyBtnLoader) {
+            
+        const resetVerifyButton = () => {
+            verifyWhatsAppBtn.disabled = false;
+            verifyBtnText.innerHTML = '<i class="fab fa-whatsapp mr-1"></i> Verify';
+            verifyBtnLoader.classList.add('hidden');
+            verifyBtnText.classList.remove('hidden');
+            verifyWhatsAppBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+            verifyWhatsAppBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+            whatsappStatusText.textContent = 'Number eka enter karala verify click karanna.';
+            whatsappStatusText.className = 'text-xs text-gray-500 mt-1 transition-colors duration-200';
+        };
+
+        whatsAppInput.addEventListener('input', () => { resetVerifyButton(); });
+
+        verifyWhatsAppBtn.addEventListener('click', () => {
+            const whatsAppNumber = whatsAppInput.value.trim();
+            if (!whatsAppNumber) {
+                alert('Verify kirimata WhatsApp number eka type karanna.');
+                whatsAppInput.focus();
+                return;
+            }
+            verifyWhatsAppBtn.disabled = true;
+            verifyBtnText.classList.add('hidden');
+            verifyBtnLoader.classList.remove('hidden');
+            whatsappStatusText.textContent = 'Verifying...';
+            whatsappStatusText.className = 'text-xs text-blue-600 mt-1 transition-colors duration-200';
+
+            setTimeout(() => {
+                verifyBtnLoader.classList.add('hidden');
+                verifyBtnText.classList.remove('hidden');
+                verifyBtnText.innerHTML = '<i class="fas fa-check mr-1"></i> Verified';
+                verifyWhatsAppBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                verifyWhatsAppBtn.classList.add('bg-gray-400', 'cursor-not-allowed'); 
+                whatsappStatusText.textContent = 'WhatsApp Number Verified!';
+                whatsappStatusText.className = 'text-xs text-green-600 mt-1 transition-colors duration-200';
+            }, 2000); 
+        });
+    }
+
+
+    // Account Details Form eka Save karana eka
+    if (profileDetailsForm) {
+        profileDetailsForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserDocRef) return;
+
+            const updatedData = {
+                name: document.getElementById('profile-name').value,
+                phone: document.getElementById('profile-phone').value,
+                whatsapp: document.getElementById('profile-whatsapp').value, 
+                email: currentUser.email 
+            };
+
+            try {
+                await setDoc(currentUserDocRef, updatedData, { merge: true });
+                formStatus.textContent = 'Profile updated successfully!';
+                formStatus.classList.remove('text-red-500');
+                formStatus.classList.add('text-green-600');
+                if (profileNotification) {
+                    profileNotification.classList.add('hidden');
+                }
+                if (updatedData.name) {
+                    const userName = updatedData.name.split(' ')[0];
+                    welcomeMessage.innerHTML = `Hello <strong>${userName}</strong> (not ${userName}? <a href="#" data-view="logout" class="text-amber-600 hover:underline">Log out</a>)`;
+                }
+            } catch (error) {
+                console.error("Error updating profile:", error);
+                formStatus.textContent = 'Error updating profile. Please try again.';
+                formStatus.classList.remove('text-green-600');
+                formStatus.classList.add('text-red-500');
+            }
+            setTimeout(() => { formStatus.textContent = ''; }, 3000);
+        });
+    }
+
+    // ImgBB walata Photo Upload karana eka
+    if (profilePicInput) {
+        profilePicInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file || !currentUser) return;
+
+            picUploadStatus.textContent = 'Uploading...';
+            const apiKey = "e1a633610b9b80b8a73e426e7d78cf0e"; 
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.success) {
+                    const downloadURL = result.data.url; 
+                    await setDoc(currentUserDocRef, { photoURL: downloadURL }, { merge: true });
+                    profilePicImg.src = downloadURL;
+                    picUploadStatus.textContent = 'Upload complete!';
+                } else {
+                    throw new Error(result.error.message || 'ImgBB upload failed');
+                }
+            } catch (error) {
+                console.error("Error uploading profile picture:", error);
+                picUploadStatus.textContent = 'Upload failed. Try again.';
+            }
+            setTimeout(() => { picUploadStatus.textContent = ''; }, 3000);
+        });
+    }
+
+
+    // --- ADDRESS LOGIC EKA ---
+
+    const openAddressModal = (addressDoc = null) => {
+        addressForm.reset(); 
+        addressEditId.value = '';
+        addressFormError.textContent = '';
+        deleteAddressBtn.classList.add('hidden');
+
+        if (addressDoc) {
+            // Edit mode
+            const data = addressDoc.data();
+            addressFormTitle.textContent = 'Edit Address';
+            addressEditId.value = addressDoc.id;
+            addressName.value = data.name || '';
+            addressPhone.value = data.phone || '';
+            addressLine.value = data.address || '';
+            addressCity.value = data.city || '';
+            addressDistrict.value = data.district || '';
+            addressPostalCode.value = data.postalCode || '';
+            addressIsDefault.checked = data.isDefault || false;
+            deleteAddressBtn.classList.remove('hidden');
+        } else {
+            // Add mode
+            addressFormTitle.textContent = 'Add New Address';
+        }
+        addressModal.classList.remove('hidden');
+    }
+    
+    const closeAddressModal = () => addressModal.classList.add('hidden');
+
+    const loadUserAddresses = async () => {
+        if (!currentUser) return;
+        addressesListContainer.innerHTML = '<p class="text-slate-500 text-center">Loading your addresses...</p>';
+
+        try {
+            const addressesColRef = collection(db, 'users', currentUser.uid, 'addresses');
+            const q = query(addressesColRef, orderBy('isDefault', 'desc')); 
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                addressesListContainer.innerHTML = `<p class="text-slate-500 text-center p-4 border rounded-md bg-slate-50">You have no saved addresses. Click 'Add New' to get started.</p>`;
+                return;
+            }
+
+            addressesListContainer.innerHTML = querySnapshot.docs.map(doc => {
+                const data = doc.data();
+                const isDefault = data.isDefault || false;
+                
+                return `
+                <div class="address-card ${isDefault ? 'is-default' : ''}">
+                    ${isDefault ? '<span class="default-badge">DEFAULT</span>' : ''}
+                    <h4 class="font-bold text-lg text-gray-800">${data.name}</h4>
+                    <p class="text-gray-600 text-sm">${data.phone}</p>
+                    <p class="text-gray-600 text-sm mt-2">
+                        ${data.address},<br>
+                        ${data.city}, ${data.district},<br>
+                        ${data.postalCode}
+                    </p>
+                    <div class="flex gap-2 mt-4">
+                        <button class="edit-address-btn text-sm text-amber-600 hover:underline font-medium" data-id="${doc.id}">Edit</button>
+                        <span class="text-gray-300">|</span>
+                        <button class="delete-address-btn text-sm text-red-600 hover:underline font-medium" data-id="${doc.id}">Delete</button>
+                        ${!isDefault ? `
+                            <span class="text-gray-300">|</span>
+                            <button class="set-default-btn text-sm text-green-600 hover:underline font-medium" data-id="${doc.id}">Set as Default</button>
+                        ` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+
+        } catch (error) {
+            console.error("Error loading addresses: ", error);
+            addressesListContainer.innerHTML = `<p class="text-red-500 text-center">Could not load addresses. Please try again later.</p>`;
+        }
+    }
+
+    const handleSetDefaultAddress = async (docIdToSet) => {
+        if (!currentUser) return;
+        
+        try {
+            const batch = writeBatch(db);
+            const addressesColRef = collection(db, 'users', currentUser.uid, 'addresses');
+
+            const q = query(addressesColRef, where('isDefault', '==', true));
+            const oldDefaultsSnap = await getDocs(q);
+            oldDefaultsSnap.docs.forEach(doc => {
+                batch.update(doc.ref, { isDefault: false });
+            });
+
+            const newDefaultRef = doc(addressesColRef, docIdToSet);
+            batch.update(newDefaultRef, { isDefault: true });
+
+            await batch.commit();
+            loadUserAddresses();
+
+        } catch (error) {
+            console.error("Error setting default address: ", error);
+            alert('Error setting default address. Please try again.');
+        }
+    }
+
+    if (addNewAddressBtn) addNewAddressBtn.addEventListener('click', () => openAddressModal(null));
+    if (closeAddressModalBtn) closeAddressModalBtn.addEventListener('click', closeAddressModal);
+
+    if (addressForm) {
+        addressForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const addressesColRef = collection(db, 'users', currentUser.uid, 'addresses');
+            const editId = addressEditId.value;
+
+            const addressData = {
+                name: addressName.value,
+                phone: addressPhone.value,
+                address: addressLine.value,
+                city: addressCity.value,
+                district: addressDistrict.value,
+                postalCode: addressPostalCode.value,
+                isDefault: addressIsDefault.checked
+            };
+
+            try {
+                let savedDocId = editId;
+
+                if (addressData.isDefault) {
+                    const batch = writeBatch(db);
+                    const q = query(addressesColRef, where('isDefault', '==', true));
+                    const oldDefaultsSnap = await getDocs(q);
+                    oldDefaultsSnap.docs.forEach(doc => {
+                        if (doc.id !== editId) {
+                            batch.update(doc.ref, { isDefault: false });
+                        }
+                    });
+                    await batch.commit();
+                }
+
+
+                if (editId) {
+                    await setDoc(doc(addressesColRef, editId), addressData);
+                } else {
+                    const newDocRef = await addDoc(addressesColRef, addressData);
+                    savedDocId = newDocRef.id;
+                }
+                
+                closeAddressModal();
+                loadUserAddresses();
+
+            } catch (error) {
+                console.error("Error saving address: ", error);
+                addressFormError.textContent = "Error saving address. Please try again.";
+            }
+        });
+    }
+
+    if (addressesListContainer) {
+        addressesListContainer.addEventListener('click', async (e) => {
+            const target = e.target;
+            const id = target.dataset.id;
+            if (!id || !currentUser) return;
+
+            const addressesColRef = collection(db, 'users', currentUser.uid, 'addresses');
+
+            if (target.classList.contains('edit-address-btn')) {
+                try {
+                    const docSnap = await getDoc(doc(addressesColRef, id));
+                    if (docSnap.exists()) {
+                        openAddressModal(docSnap);
+                    }
+                } catch (error) {
+                    console.error("Error fetching address to edit: ", error);
+                }
+            }
+            
+            if (target.classList.contains('delete-address-btn')) {
+                if (confirm('Are you sure you want to delete this address?')) {
+                    try {
+                        await deleteDoc(doc(addressesColRef, id));
+                        loadUserAddresses();
+                    } catch (error) {
+                        console.error("Error deleting address: ", error);
+                        alert('Error deleting address.');
+                    }
+                }
+            }
+            
+            if (target.classList.contains('set-default-btn')) {
+                await handleSetDefaultAddress(id);
+            }
+        });
+    }
+
+    if (deleteAddressBtn) {
+        deleteAddressBtn.addEventListener('click', async () => {
+            const id = addressEditId.value;
+            if (!id || !currentUser) return;
+
+            if (confirm('Are you sure you want to delete this address?')) {
+                try {
+                    const addressesColRef = collection(db, 'users', currentUser.uid, 'addresses');
+                    await deleteDoc(doc(addressesColRef, id));
+                    closeAddressModal();
+                    loadUserAddresses();
+                } catch (error) {
+                    console.error("Error deleting address: ", error);
+                    addressFormError.textContent = 'Error deleting address.';
+                }
+            }
+        });
+    }
+    // --- ADDRESS LOGIC EKA IWARAI ---
+
+
+    // Page eka load weddi badges update karanna
+    updateCartCountBadge();
+    updateWishlistCountBadge();
+
+</script>
+
+</body>
+</html>

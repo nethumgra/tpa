@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TPA - Track Your Order</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .modal-bg { background-color: rgba(0,0,0,0.5); }
+        .tab-button.active { border-color: #eab308; color: #eab308; } /* Amber */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+        .pop { animation: pop 0.2s ease-out; }
+        /* --- AMBER COLOR SCHEME --- */
+        .header-top-bar { background-color: #eab308; } /* Amber */
+        .main-accent-color { color: #eab308; } /* Amber */
+        .main-accent-color-hover:hover { color: #d97706; } /* Darker Amber */
+        .main-accent-bg { background-color: #eab308; } /* Amber */
+        .main-accent-bg-hover:hover { background-color: #d97706; } /* Darker Amber */
+        .main-accent-border { border-color: #eab308; } /* Amber */
+        .main-nav { background-color: #f3f4f6; border-bottom: 1px solid #e5e7eb; } /* From index */
+
+        .footer-bottom .fa-cc-visa { color: #1A1F71; }
+        .footer-bottom .fa-cc-amex { color: #007BC1; }
+        .footer-bottom .fa-cc-paypal { color: #003087; }
+        .footer-bottom .fa-cc-mastercard { color: #EB001B; }
+        .footer-bottom .fa-cc-discover { color: #FF6600; }
+        .fixed-chat-button {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+            background-color: #eab308; color: white; /* Amber */
+            width: 60px; height: 60px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .fixed-chat-button:hover { transform: scale(1.1); }
+        .fixed-chat-button i { font-size: 28px; }
+        #cart-drawer {
+            transform: translateX(100%); transition: transform 0.3s ease-in-out;
+        }
+        #cart-modal-bg { opacity: 0; transition: opacity 0.3s ease-in-out; }
+        #cart-modal:not(.hidden) #cart-drawer { transform: translateX(0); }
+        #cart-modal:not(.hidden) #cart-modal-bg { opacity: 1; }
+        /* Footer Styles from index */
+        .site-footer { background-color: #f8f8f8; color: #555; font-size: 0.875rem; }
+        .site-footer h4 { font-weight: 600; color: #333; margin-bottom: 1rem; text-transform: uppercase; }
+        .site-footer a { color: #555; transition: color 0.2s ease; }
+        .site-footer a:hover { color: #d97706; } /* Amber Hover */
+        .footer-bottom { background-color: #eee; color: #666; font-size: 0.75rem; }
+        
+        /* Product Card style for related products */
+        .product-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #eab308;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <div id="auth-modal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center hidden"> <div class="bg-white rounded-lg shadow-xl w-full max-w-md m-4"> <div class="p-4 border-b"> <div class="flex justify-between items-center"> <h2 class="text-xl font-bold text-slate-700">Welcome!</h2> <button id="close-modal-btn" class="text-slate-500 hover:text-slate-800 text-3xl leading-none">&times;</button> </div> </div> <div class="p-2 bg-slate-100 flex gap-2"> <button id="login-tab-btn" class="tab-button active flex-1 bg-white p-2 rounded-md font-semibold border-b-2 main-accent-border main-accent-color">Login</button> <button id="signup-tab-btn" class="tab-button flex-1 bg-white p-2 rounded-md font-semibold text-slate-500 border-b-2 border-transparent">Sign Up</button> </div> <div class="p-6" style="max-height: 70vh; overflow-y: auto;"> <form id="login-form" class="space-y-4"> <input type="email" id="login-email" placeholder="Email" required class="w-full p-3 border rounded-md"> <input type="password" id="login-password" placeholder="Password" required class="w-full p-3 border rounded-md"> <button type="submit" class="w-full main-accent-bg text-white p-3 rounded-md main-accent-bg-hover">Login</button> <p id="login-error" class="text-red-500 text-sm text-center"></p> </form> <form id="signup-form" class="space-y-4 hidden"> <input type="text" id="signup-name" placeholder="Full Name" required class="w-full p-3 border rounded-md"> <input type="email" id="signup-email" placeholder="Email" required class="w-full p-3 border rounded-md"> <input type="password" id="signup-password" placeholder="Password" required class="w-full p-3 border rounded-md"> <input type="tel" id="signup-phone" placeholder="Phone Number" required class="w-full p-3 border rounded-md"> <input type="text" id="signup-address" placeholder="Address" required class="w-full p-3 border rounded-md"> <div class="grid grid-cols-2 gap-4"> <input type="text" id="signup-city" placeholder="City" required class="w-full p-3 border rounded-md"> <input type="text" id="signup-district" placeholder="District" required class="w-full p-3 border rounded-md"> </div> <input type="text" id="signup-postal-code" placeholder="Postal Code" required class="w-full p-3 border rounded-md"> <button type="submit" class="w-full main-accent-bg text-white p-3 rounded-md main-accent-bg-hover">Create Account</button> <p id="signup-error" class="text-red-500 text-sm text-center"></p> </form> </div> </div> </div>
+
+     <div id="cart-modal" class="fixed inset-0 z-50 hidden">
+         <div id="cart-modal-bg" class="fixed inset-0 modal-bg"></div>
+         <div id="cart-drawer" class="fixed top-0 right-0 h-full bg-white shadow-xl w-full max-w-md flex flex-col">
+             <div class="p-4 flex justify-between items-center border-b flex-shrink-0">
+                 <h2 class="text-xl font-semibold text-slate-800">Shopping cart</h2>
+                 <button id="close-cart-btn" class="text-slate-500 hover:text-slate-800 text-sm flex items-center gap-1">
+                     <i class="fas fa-times"></i> Close
+                 </button>
+             </div>
+             <div class="flex-grow p-6 overflow-y-auto">
+                 <div id="cart-items-container" class="divide-y divide-slate-100">
+                     <p class="text-slate-500 py-6 text-center">Your cart is empty.</p>
+                 </div>
+             </div>
+             <div class="p-6 border-t bg-slate-50 flex-shrink-0">
+                 <div class="flex justify-between items-center mb-2">
+                     <span class="text-lg font-medium text-slate-600">Subtotal:</span>
+                     <span id="cart-total" class="text-xl font-bold main-accent-color">Rs. 0.00</span>
+                 </div>
+                 <p class="text-sm text-center text-slate-500 mb-2">Shipping & taxes calculated at checkout.</p>
+                 <div class="flex flex-col gap-3 mt-4">
+                     <a href="cart.html" class="w-full text-center bg-white border-2 main-accent-border main-accent-color p-3 rounded-lg hover:bg-amber-50 font-bold text-base">
+                         VIEW CART
+                     </a>
+                     <a href="checkout.html" id="checkout-btn-modal" class="w-full text-center main-accent-bg text-white p-3 rounded-lg main-accent-bg-hover font-bold text-base">
+                         CHECKOUT
+                     </a>
+                 </div>
+             </div>
+         </div>
+     </div>
+
+    <div id="cancel-order-modal" class="fixed inset-0 modal-bg z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h2 class="text-lg font-semibold text-gray-800">Cancel Order</h2>
+                <button id="close-cancel-modal-btn" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-gray-600">Are you sure you want to cancel this order? Please select a reason below.</p>
+                <div>
+                    <label for="cancel-reason-select" class="block text-sm font-medium text-gray-700 mb-1">Reason for cancellation</label>
+                    <select id="cancel-reason-select" class="w-full p-2 border border-gray-300 rounded-md">
+                        <option value="">Please select a reason...</option>
+                        <option value="Ordered by mistake">Ordered by mistake</option>
+                        <option value="Found a better price">Found a better price</option>
+                        <option value="No longer needed">No longer needed</option>
+                        <option value="Other">Other (Please specify)</option>
+                    </select>
+                </div>
+                <div>
+                    <textarea id="cancel-reason-other" rows="3" placeholder="Please specify your reason" class="w-full p-2 border border-gray-300 rounded-md hidden"></textarea>
+                </div>
+                <button id="submit-cancel-btn" class="w-full bg-red-600 text-white p-3 rounded-md hover:bg-red-700 font-semibold disabled:opacity-50">Submit Cancellation</button>
+                <p id="cancel-status-message" class="text-sm text-center mt-2"></p>
+            </div>
+        </div>
+    </div>
+
+
+     <header class="sticky top-0 z-40 bg-white shadow-md">
+         <div class="header-top-bar text-white text-xs py-1"> <div class="container mx-auto px-4 flex justify-between items-center"> <span>Your Ultimate Destination</span> <div class="flex items-center space-x-4"> <a href="#" class="hover:text-gray-300"><i class="fab fa-facebook-f"></i></a> <a href="#" class="hover:text-gray-300"><i class="fab fa-instagram"></i></a> <a href="#" class="hover:text-gray-300"><i class="fab fa-whatsapp"></i></a> <span class="border-l border-amber-400 h-4"></span> <a href="#" class="hover:underline">NEWSLETTER</a> <a href="#" class="hover:underline">CONTACT US</a> <a href="#" class="hover:underline">FAQS</a> </div> </div> </div>
+         <div class="py-4 border-b"> <div class="container mx-auto px-4 flex justify-between items-center gap-6"> <a href="index.html" id="logo-btn" class="flex-shrink-0">
+             <img src="LOGO.png" alt="TPA - The Phone Arcade" class="h-10 md:h-12">
+             </a> <div class="flex-grow flex border border-gray-300 rounded-md overflow-hidden"> <input type="text" id="search-bar" placeholder="Search for products" class="w-full px-4 py-2 focus:outline-none text-sm">
+             <select id="search-category-dropdown" class="border-l border-gray-300 px-2 text-sm text-gray-600 focus:outline-none bg-gray-50 hidden md:block">
+                 <option value="all">ALL CATEGORIES</option>
+             </select>
+             <button id="search-icon-btn" class="bg-gray-100 px-4 text-gray-600 hover:bg-gray-200"> <i class="fas fa-search"></i> </button> </div> <div class="flex items-center space-x-3 md:space-x-4 text-gray-700"> <div id="auth-links" class="text-sm hidden md:block"> <button id="login-btn-nav" class="hover:main-accent-color">LOGIN</button> / <button id="signup-btn-nav" class="hover:main-accent-color">REGISTER</button> </div> <div id="user-info" class="hidden items-center space-x-2 text-sm"> <i class="fas fa-user text-xl text-gray-500"></i> <span id="user-email" class="hidden lg:inline"></span> <button id="logout-btn-nav" class="hover:main-accent-color ml-2">(Logout)</button> </div> <span class="border-l h-5 self-center hidden md:block"></span> <a href="#" title="Wishlist" class="relative hover:main-accent-color"> <i class="fas fa-heart text-xl"></i> <span class="absolute -top-1 -right-1 main-accent-bg text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> </a> <a href="#" title="Compare" class="relative hover:main-accent-color hidden md:block"> <i class="fas fa-exchange-alt text-xl"></i> <span class="absolute -top-1 -right-1 main-accent-bg text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> </a> <a href="cart.html" id="cart-icon" title="Cart" class="relative hover:main-accent-color flex items-center"> <i class="fas fa-shopping-bag text-xl"></i> <span id="cart-count-badge" class="absolute -top-1 -right-2 main-accent-bg text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span> <span class="ml-2 text-sm font-semibold hidden md:inline">Rs.0.00</span> </a>
+             <a href="track.html" id="tracking-icon-btn" title="Track My Orders" class="relative hover:main-accent-color">
+                 <i class="fas fa-clipboard-list text-xl"></i>
+             </a> </div> </div> </div>
+         <nav class="main-nav hidden md:block"> <div class="container mx-auto px-4 flex justify-between items-center h-12"> <div class="flex space-x-6 text-sm font-medium"> <a href="index.html" class="main-accent-color hover:text-gray-900">HOME</a> <a href="index.html?category=all" class="text-gray-700 hover:main-accent-color">SHOP</a> <a href="#" class="text-gray-700 hover:main-accent-color">ABOUT US</a> <a href="#" class="text-gray-700 hover:main-accent-color">CONTACT US</a> <a href="#" class="text-gray-700 hover:main-accent-color">STORE</a> </div> <a href="#" class="main-accent-color font-semibold text-sm flex items-center gap-1 hover:text-gray-900"> <i class="fas fa-heart text-xs"></i> SPECIAL OFFERS </a> </div> </nav>
+     </header>
+
+     <main id="track-page" class="container mx-auto p-6 mt-6 min-h-[60vh]">
+        <h1 class="text-3xl font-bold text-slate-800 mb-6">My Orders</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md border">
+            <h2 class="text-2xl font-semibold mb-4 border-b pb-3">Your Order History</h2>
+            <div id="order-tracking-list" class="space-y-6">
+                <p class="text-slate-500 text-center py-10">Loading your orders...</p>
+            </div>
+        </div>
+        
+     </main>
+
+     <section id="related-products-section" class="container mx-auto p-6 mt-12 hidden">
+          <h2 class="text-2xl font-bold text-gray-800 mb-6 text-left">You Might Also Like</h2>
+          <div id="related-products-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              <p class="text-slate-500 col-span-full text-center py-5">Loading related products...</p>
+          </div>
+     </section>
+
+  <footer class="site-footer border-t pt-10 mt-10">
+          <div class="container mx-auto px-4 pb-10">
+               <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div class="space-y-4">
+                         <img src="LOGO.png" alt="TPA - The Phone Arcade" class="h-10 mb-4">
+                         <p>High-quality electronics, essentials & appliances are now at your fingertips. Confirm your order now !</p>
+                         <p><i class="fas fa-map-marker-alt mr-2 text-amber-700"></i> 890/a Main Street, Kaduruwela, Polonnaruwa</p>
+                         <p><i class="fas fa-phone-alt mr-2 text-amber-700"></i> Phone: 077 754 9654 / 027 222 4470</p>
+                         <p><i class="fas fa-envelope mr-2 text-amber-700"></i> Email: info@buyzone.lk</p>
+                    </div>
+                    <div>
+                         <h4>Quick Links</h4>
+                         <ul class="space-y-2">
+                              <li><a href="index.html">Home</a></li>
+                              <li><a href="shop.html">Shop</a></li>
+                              <li><a href="about.html">About Us</a></li>
+                              <li><a href="contact.html">Contact Us</a></li>
+                              <li><a href="#">Special Offers</a></li>
+                         </ul>
+                    </div>
+                    <div>
+                         <h4>Useful Links</h4>
+                         <ul class="space-y-2">
+                              <li><a href="#">Privacy Policy</a></li>
+                              <li><a href="#">Returns</a></li>
+                              <li><a href="#">Terms & Conditions</a></li>
+                              <li><a href="#">Contact Us</a></li>
+                              <li><a href="#">Latest News</a></li>
+                              <li><a href="#">Our Sitemap</a></li>
+                         </ul>
+                    </div>
+                    <div>
+                         <h4>My Account</h4>
+                         <ul class="space-y-2">
+                              <li><a href="profile.html">My Profile</a></li>
+                              <li><a href="cart.html">View Cart</a></li>
+                              <li><a href="#" id="footer-orders-link">Track My Orders</a></li>
+                              <li><a href="wishlist.html">My Wishlist</a></li>
+                         </ul>
+                    </div>
+               </div>
+          </div>
+          <div class="footer-bottom py-4 px-4">
+               <div class="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+                    <span>TPA © 2025 CREATED BY <a href="https://pixora.com" target="_blank" rel="noopener noreferrer" class="font-semibold hover:text-amber-700">PIXORA IT SOLUTIONS</a></span>
+                    <div class="flex space-x-2 mt-4 md:mt-0">
+                         <i class="fab fa-cc-visa text-2xl"></i>
+                         <i class="fab fa-cc-amex text-2xl"></i>
+                         <i class="fab fa-cc-paypal text-2xl"></i>
+                         <i class="fab fa-cc-mastercard text-2xl"></i>
+                         <i class="fab fa-cc-discover text-2xl"></i>
+                         </div>
+               </div>
+          </div>
+     </footer>
+
+     <a href="https://wa.me/94777349654?text=Hello%20TPA%2C%20I'd%20like%20to%20ask%20a%20question."
+        class="fixed-chat-button"
+        aria-label="Chat on WhatsApp"
+        target="_blank"
+        rel="noopener noreferrer">
+        <i class="fab fa-whatsapp"></i> </a>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, where, serverTimestamp, setDoc, doc, limit, getDoc, getDocs, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAtvnbedBpCiRe_ZyfoB-TacrboEMgft5Y", authDomain: "mobile-shop-1c315.firebaseapp.com", projectId: "mobile-shop-1c315", storageBucket: "mobile-shop-1c315.firebasestorage.app", messagingSenderId: "689278786227", appId: "1:689278786227:web:ee06565e4a230381bf6ec6", measurementId: "G-MLDEWBBEMV"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const productsCol = collection(db, 'products');
+    const categoriesCol = collection(db, 'categories');
+    const usersCol = collection(db, 'users');
+    const ordersCol = collection(db, 'orders');
+    const offersCol = collection(db, 'offers');
+
+    const authModal = document.getElementById('auth-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const loginBtnNav = document.getElementById('login-btn-nav');
+    const signupBtnNav = document.getElementById('signup-btn-nav');
+    const logoutBtnNav = document.getElementById('logout-btn-nav');
+    const loginTab = document.getElementById('login-tab-btn');
+    const signupTab = document.getElementById('signup-tab-btn');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const authLinks = document.getElementById('auth-links');
+    const userInfo = document.getElementById('user-info');
+    const userEmailSpan = document.getElementById('user-email');
+    const cartCountBadge = document.getElementById('cart-count-badge');
+    const cartIcon = document.getElementById('cart-icon');
+    const cartModal = document.getElementById('cart-modal');
+    const cartModalBg = document.getElementById('cart-modal-bg');
+    const closeCartBtn = document.getElementById('close-cart-btn');
+    const cartItemsContainer = document.getElementById('cart-items-container');
+    const cartTotalEl = document.getElementById('cart-total');
+    const trackingIconBtn = document.getElementById('tracking-icon-btn');
+    const logoBtn = document.getElementById('logo-btn');
+    const searchBar = document.getElementById('search-bar');
+    const searchCategoryDropdown = document.getElementById('search-category-dropdown');
+    const searchIconBtn = document.getElementById('search-icon-btn');
+
+    const orderTrackingList = document.getElementById('order-tracking-list');
+    const relatedProductsSection = document.getElementById('related-products-section');
+    const relatedProductsGrid = document.getElementById('related-products-grid');
+    
+    const cancelOrderModal = document.getElementById('cancel-order-modal');
+    const closeCancelModalBtn = document.getElementById('close-cancel-modal-btn');
+    const submitCancelBtn = document.getElementById('submit-cancel-btn');
+    const cancelReasonSelect = document.getElementById('cancel-reason-select');
+    const cancelReasonOther = document.getElementById('cancel-reason-other');
+    const cancelStatusMessage = document.getElementById('cancel-status-message');
+    
+    let categoriesCache = [];
+    let currentUserDetails = null;
+    let unsubscribeOrders = null;
+    let allActiveOffers = new Map();
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            if(authLinks) { authLinks.classList.add('hidden'); authLinks.classList.remove('md:block'); }
+            if(userInfo) { userInfo.classList.remove('hidden'); userInfo.classList.add('flex'); }
+            try {
+                const userDocRef = doc(db, "users", user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+                    currentUserDetails = userDoc.data();
+                    if (userDoc.data().role === "admin") {
+                        if(userEmailSpan) userEmailSpan.textContent = `${user.email} (Admin)`;
+                    } else {
+                        if(userEmailSpan) userEmailSpan.textContent = user.email;
+                    }
+                } else {
+                     currentUserDetails = { email: user.email, name: user.email };
+                }
+            } catch (error) {
+                console.error("Error fetching user role: ", error);
+                if(userEmailSpan) userEmailSpan.textContent = user.email;
+                currentUserDetails = { email: user.email, name: user.email };
+            }
+            if(authModal) authModal.classList.add('hidden');
+            loadUserOrders(user.uid);
+        } else {
+            if(authLinks) { authLinks.classList.remove('hidden', 'md:block'); authLinks.classList.add('md:block'); }
+            if(userInfo) { userInfo.classList.add('hidden'); userInfo.classList.remove('flex'); }
+            if(userEmailSpan) userEmailSpan.textContent = '';
+            currentUserDetails = null;
+            loadUserOrders(null);
+        }
+    });
+
+    const openModal = (isLogin = true) => { if(authModal) authModal.classList.remove('hidden'); if(isLogin){ if(loginTab) loginTab.click(); } else { if(signupTab) signupTab.click(); } }; if(loginBtnNav) loginBtnNav.addEventListener('click', () => openModal(true)); if(signupBtnNav) signupBtnNav.addEventListener('click', () => openModal(false)); if(closeModalBtn) closeModalBtn.addEventListener('click', () => {if(authModal) authModal.classList.add('hidden');}); if(loginTab) loginTab.addEventListener('click', () => { loginTab.classList.add('active'); if(signupTab) signupTab.classList.remove('active'); if(loginForm) loginForm.classList.remove('hidden'); if(signupForm) signupForm.classList.add('hidden'); }); if(signupTab) signupTab.addEventListener('click', () => { signupTab.classList.add('active'); if(loginTab) loginTab.classList.remove('active'); if(signupForm) signupForm.classList.remove('hidden'); if(loginForm) loginForm.classList.add('hidden'); });
+    if(loginForm) loginForm.addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('login-email').value; const password = document.getElementById('login-password').value; const errorP = document.getElementById('login-error'); if(errorP) errorP.textContent = ''; try { await signInWithEmailAndPassword(auth, email, password); } catch (error) { console.error("Login Error:", error); if(errorP) errorP.textContent = error.message; } }); if(signupForm) signupForm.addEventListener('submit', async (e) => { e.preventDefault(); const email = document.getElementById('signup-email').value; const password = document.getElementById('signup-password').value; const name = document.getElementById('signup-name').value; const phone = document.getElementById('signup-phone').value; const address = document.getElementById('signup-address').value; const city = document.getElementById('signup-city').value; const district = document.getElementById('signup-district').value; const postalCode = document.getElementById('signup-postal-code').value; const errorP = document.getElementById('signup-error'); if(errorP) errorP.textContent = ''; try { const userCredential = await createUserWithEmailAndPassword(auth, email, password); const user = userCredential.user; await setDoc(doc(db, "users", user.uid), { name: name, email: email, phone: phone, address: address, city: city, district: district, postalCode: postalCode, createdAt: serverTimestamp(), role: "customer" }); } catch (error) { console.error("Signup Error:", error); if(errorP) errorP.textContent = error.message; } }); if(logoutBtnNav) logoutBtnNav.addEventListener('click', () => { signOut(auth); });
+
+    const getCart = () => JSON.parse(localStorage.getItem('mobileHubCart')) || [];
+    const saveCart = (cart) => localStorage.setItem('mobileHubCart', JSON.stringify(cart));
+    const updateCartCountBadge = () => { const cart = getCart(); const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0); const cartTotalValue = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0); if (cartCountBadge) { if (totalItems > 0) { cartCountBadge.textContent = totalItems; cartCountBadge.classList.remove('hidden'); cartCountBadge.classList.add('pop'); setTimeout(() => cartCountBadge.classList.remove('pop'), 200); } else { cartCountBadge.textContent = '0'; cartCountBadge.classList.add('hidden', 'pop'); } } const cartTotalText = document.querySelector('#cart-icon span.md\\:inline'); if (cartTotalText) { cartTotalText.textContent = `Rs.${cartTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`; } };
+
+    const renderCartModal = () => { const cart = getCart(); let total = 0; if (!cartItemsContainer || !cartTotalEl) return; if (cart.length === 0) { cartItemsContainer.innerHTML = '<p class="text-slate-500 py-6 text-center">Your cart is empty.</p>'; cartTotalEl.textContent = 'Rs. 0.00'; return; } cartItemsContainer.innerHTML = cart.map(item => { total += item.price * item.quantity; return ` <div class="flex items-center gap-4 py-4"> <img src="${item.imageUrl || 'https://via.placeholder.com/64'}" alt="${item.name}" class="w-16 h-16 rounded object-contain mix-blend-multiply bg-slate-100 p-1"> <div class="flex-grow"> <h4 class="font-semibold text-sm text-slate-800">${item.name}</h4> <div class="flex items-center gap-2 my-1"> <button data-id="${item.id}" class="cart-qty-decrease w-6 h-6 font-bold rounded bg-slate-100 hover:bg-slate-200 flex items-center justify-center">-</button> <span class="w-6 text-center font-bold text-sm text-slate-700">${item.quantity}</span> <button data-id="${item.id}" class="cart-qty-increase w-6 h-6 font-bold rounded bg-slate-100 hover:bg-slate-200 flex items-center justify-center">+</button> </div> <p class="text-sm main-accent-color font-bold">Rs. ${item.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p> </div> <button data-id="${item.id}" class="cart-remove-item text-slate-400 hover:text-red-500" title="Remove Item"> <i class="fas fa-times text-lg"></i> </button> </div>`; }).join(''); cartTotalEl.textContent = `Rs. ${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`; };
+    if(cartIcon) cartIcon.addEventListener('click', (e) => { if (e.target.tagName === 'I' || e.target.tagName === 'SPAN') { e.preventDefault(); renderCartModal(); if(cartModal) cartModal.classList.remove('hidden'); } });
+    if(closeCartBtn) closeCartBtn.addEventListener('click', () => { if(cartModal) cartModal.classList.add('hidden'); });
+    if(cartModalBg) cartModalBg.addEventListener('click', () => { if(cartModal) cartModal.classList.add('hidden'); });
+    if(cartModal) cartModal.addEventListener('click', (e) => { if (e.target === e.currentTarget || e.target === cartModalBg) return; const targetLink = e.target.closest('a'); if (targetLink && (targetLink.id === 'checkout-btn-modal' || targetLink.href.includes('cart.html'))) { return; } const targetButton = e.target.closest('button'); if (!targetButton) return; const id = targetButton.dataset.id; if (!id && targetButton.id !== 'clear-cart-btn') return; let cart = getCart(); let cartChanged = false; if (targetButton.id === 'clear-cart-btn') { if (confirm('Clear entire cart?')) { cart = []; cartChanged = true; } } else { const itemIndex = cart.findIndex(i => i.id === id); if(itemIndex === -1) return; if (targetButton.classList.contains('cart-qty-increase')) { cart[itemIndex].quantity++; cartChanged = true; } else if (targetButton.classList.contains('cart-qty-decrease')) { if (cart[itemIndex].quantity > 1) { cart[itemIndex].quantity--; cartChanged = true; } else { if (confirm('Remove item?')) { cart.splice(itemIndex, 1); cartChanged = true; } } } else if (targetButton.classList.contains('cart-remove-item')) { if (confirm('Remove item?')) { cart.splice(itemIndex, 1); cartChanged = true; } } } if (cartChanged) { saveCart(cart); renderCartModal(); updateCartCountBadge(); } });
+    
+    const loadUserOrders = (userId) => {
+        if (unsubscribeOrders) { unsubscribeOrders(); }
+        if(!orderTrackingList) return;
+        if (!userId) {
+            orderTrackingList.innerHTML = `
+            <div class="text-center p-8 bg-white rounded-lg shadow-md border">
+                <h3 class="text-xl font-semibold text-slate-700 mb-4">Please Log In</h3>
+                <p class="text-slate-500 mb-6">You need to be logged in to view your order history.</p>
+                <button id="tracking-login-btn" class="main-accent-bg text-white px-6 py-2 rounded-md font-semibold main-accent-bg-hover">Login Now</button>
+            </div>`;
+            if (relatedProductsSection) relatedProductsSection.classList.add('hidden');
+            return;
+        }
+
+        orderTrackingList.innerHTML = '<p class="text-slate-500 text-center py-10">Loading your orders...</p>';
+        if (relatedProductsSection) relatedProductsSection.classList.add('hidden');
+        
+        const q = query(ordersCol, 
+            where("userId", "==", userId),
+            where("status", "!=", "Cancelled"), // <-- This line hides cancelled orders
+            orderBy("status"), // First, order by status (Firestore requirement for inequality)
+            orderBy("createdAt", "desc") // Then, order by date
+        );
+        
+        unsubscribeOrders = onSnapshot(q, (querySnapshot) => {
+            let orderedCategories = new Set();
+            let orderedItemIds = new Set();
+            if (querySnapshot.empty) {
+                orderTrackingList.innerHTML = `
+                <div class="text-center p-8 bg-white rounded-lg shadow-md border">
+                    <h3 class="text-xl font-semibold text-slate-700 mb-4">No Active Orders Found</h3>
+                    <p class="text-slate-500">You do not have any active orders right now.</p>
+                </div>`;
+                if (relatedProductsSection) relatedProductsSection.classList.add('hidden');
+                // Even if no active orders, they might have old orders, so check for related products
+                loadRelatedProductsFromAllOrders(userId);
+                return;
+            }
+            orderTrackingList.innerHTML = querySnapshot.docs.map(doc => {
+                const order = doc.data() || {};
+                const orderId = doc.id;
+                const createdDate = order.createdAt ? order.createdAt.toDate().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
+                
+                let firstItemImage = 'https://placehold.co/100x100?text=No+Image';
+                if (order.items && Array.isArray(order.items) && order.items.length > 0) {
+                    firstItemImage = order.items[0].imageUrl || 'https://placehold.co/100x100?text=No+Image';
+                    order.items.forEach(item => {
+                        if (item.category) orderedCategories.add(item.category);
+                        if (item.id) orderedItemIds.add(item.id);
+                    });
+                }
+
+                const itemSummary = (order.items || []).map(item => `${item.name || 'Item'} (x${item.quantity || 1})`).join(', ');
+                
+                let statusColor = 'bg-slate-100 text-slate-700';
+                const statusLower = (order.status || 'Pending').toLowerCase();
+                
+                if (statusLower === 'pending' || statusLower === 'pending - call') statusColor = 'bg-yellow-100 text-yellow-800';
+                else if (statusLower === 'shipped' || statusLower === 'processing') statusColor = 'bg-blue-100 text-blue-800';
+                else if (statusLower === 'delivered') statusColor = 'bg-green-100 text-green-800';
+                // "Cancelled" status is now filtered out by the query, so no need for its color rule here
+
+                const canCancel = (statusLower === 'pending' || statusLower === 'pending - call');
+
+                return `
+                <div class="bg-white border rounded-lg p-4 shadow-sm">
+                    <div class="flex flex-col sm:flex-row justify-between items-start mb-3">
+                        <div class="flex gap-4 items-center">
+                             <img src="${firstItemImage}" alt="Order Item" class="w-16 h-16 object-contain rounded border bg-gray-50">
+                             <div>
+                                <p class="text-xs text-slate-500">Order ID: ${orderId}</p>
+                                <p class="font-bold text-lg text-slate-800">Total: Rs. ${(order.totalAmount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+                             </div>
+                        </div>
+                        <span class="text-sm font-bold px-3 py-1 rounded-full ${statusColor} mt-2 sm:mt-0">${order.status || 'Pending'}</span>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-2"><strong>Placed On:</strong> ${createdDate}</p>
+                    <p class="text-sm text-slate-600 mb-3 break-words"><strong>Items:</strong> ${itemSummary || 'No items found'}</p>
+                    <div class="flex justify-between items-center border-t pt-3 mt-3">
+                        <div class="bg-slate-50 p-2 rounded-md flex-1">
+                            <p class="text-sm font-semibold text-slate-700">Shipping to: ${order.customerInfo?.name || 'N/A'}</p>
+                            <p class="text-xs text-slate-500">${order.customerInfo?.address || 'N/A'}, ${order.customerInfo?.city || ''}</p>
+                        </div>
+                        ${canCancel ? 
+                        `<button data-id="${orderId}" class="cancel-order-btn ml-4 bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 text-sm">Cancel Order</button>` :
+                        `<button class="ml-4 bg-gray-400 text-white px-4 py-2 rounded-md font-semibold cursor-not-allowed text-sm" disabled>${order.status}</button>`
+                        }
+                    </div>
+                </div>`;
+            }).join('');
+
+            if (orderedCategories.size > 0) {
+                loadRelatedProducts(Array.from(orderedCategories), Array.from(orderedItemIds));
+            } else {
+                 // If active orders have no categories, check all orders
+                 loadRelatedProductsFromAllOrders(userId);
+            }
+        }, (error) => {
+            console.error("Error fetching orders: ", error);
+            orderTrackingList.innerHTML = '<p class="text-red-500 text-center py-10">Could not load your orders. Please try again later.</p>';
+            if (relatedProductsSection) relatedProductsSection.classList.add('hidden');
+        });
+    };
+    
+    // New function to get categories from *all* orders, including cancelled ones
+    const loadRelatedProductsFromAllOrders = async (userId) => {
+         if (!userId) return;
+         try {
+            const allOrdersQuery = query(ordersCol, where("userId", "==", userId));
+            const snapshot = await getDocs(allOrdersQuery);
+            let orderedCategories = new Set();
+            let orderedItemIds = new Set();
+            snapshot.forEach(doc => {
+                 const order = doc.data();
+                 if (order.items && Array.isArray(order.items)) {
+                    order.items.forEach(item => {
+                        if (item.category) orderedCategories.add(item.category);
+                        if (item.id) orderedItemIds.add(item.id);
+                    });
+                }
+            });
+            if (orderedCategories.size > 0) {
+                loadRelatedProducts(Array.from(orderedCategories), Array.from(orderedItemIds));
+            }
+         } catch (e) {
+            console.error("Error fetching all orders for related products:", e);
+         }
+    };
+
+
+    if (orderTrackingList) {
+        orderTrackingList.addEventListener('click', async (e) => {
+            const cancelBtn = e.target.closest('.cancel-order-btn');
+            if (cancelBtn && !cancelBtn.disabled) {
+                const orderId = cancelBtn.dataset.id;
+                if (cancelOrderModal) {
+                    cancelOrderModal.dataset.orderId = orderId;
+                    cancelReasonSelect.value = '';
+                    cancelReasonOther.value = '';
+                    cancelReasonOther.classList.add('hidden');
+                    cancelStatusMessage.textContent = '';
+                    submitCancelBtn.disabled = false;
+                    submitCancelBtn.textContent = 'Submit Cancellation';
+                    cancelOrderModal.classList.remove('hidden');
+                }
+                return;
+            }
+            const loginBtn = e.target.closest('#tracking-login-btn');
+            if (loginBtn) { openModal(true); }
+        });
+    }
+    
+    if (closeCancelModalBtn) {
+        closeCancelModalBtn.addEventListener('click', () => {
+            cancelOrderModal.classList.add('hidden');
+        });
+    }
+
+    if (cancelReasonSelect) {
+        cancelReasonSelect.addEventListener('change', () => {
+            if (cancelReasonSelect.value === 'Other') {
+                cancelReasonOther.classList.remove('hidden');
+            } else {
+                cancelReasonOther.classList.add('hidden');
+            }
+        });
+    }
+
+    if (submitCancelBtn) {
+        submitCancelBtn.addEventListener('click', async () => {
+            const orderId = cancelOrderModal.dataset.orderId;
+            if (!orderId) {
+                cancelStatusMessage.textContent = 'Error: Order ID not found.';
+                cancelStatusMessage.className = 'text-red-500 text-sm text-center mt-2';
+                return;
+            }
+            const reason = cancelReasonSelect.value;
+            const otherReason = cancelReasonOther.value.trim();
+            let finalReason = reason;
+
+            if (reason === '') {
+                cancelStatusMessage.textContent = 'Please select a reason.';
+                cancelStatusMessage.className = 'text-red-500 text-sm text-center mt-2';
+                return;
+            }
+            if (reason === 'Other' && !otherReason) {
+                cancelStatusMessage.textContent = 'Please specify your reason.';
+                cancelStatusMessage.className = 'text-red-500 text-sm text-center mt-2';
+                return;
+            }
+            
+            if (reason === 'Other') {
+                finalReason = otherReason;
+            }
+
+            submitCancelBtn.disabled = true;
+            submitCancelBtn.textContent = 'Cancelling...';
+            cancelStatusMessage.textContent = '';
+
+            try {
+                const orderRef = doc(db, "orders", orderId);
+                await updateDoc(orderRef, {
+                    status: "Cancelled",
+                    cancellationReason: finalReason
+                });
+                cancelOrderModal.classList.add('hidden');
+                
+            } catch (error) {
+                console.error("Error cancelling order: ", error);
+                cancelStatusMessage.textContent = 'Failed to cancel order. Please try again.';
+                cancelStatusMessage.className = 'text-red-500 text-sm text-center mt-2';
+                submitCancelBtn.disabled = false;
+                submitCancelBtn.textContent = 'Submit Cancellation';
+            }
+        });
+    }
+
+    const findOfferForProduct = (productId) => {
+        for (const offer of allActiveOffers.values()) {
+            if (offer.productIds && offer.productIds.includes(productId)) {
+                return offer;
+            }
+        }
+        return null;
+    };
+
+    const renderRelatedProducts = (products, gridElementId) => {
+         const gridElement = document.getElementById(gridElementId);
+         if (!gridElement) return;
+         if (!products || products.length === 0) {
+             gridElement.innerHTML = '<p class="text-slate-500 col-span-full text-center py-5">No related products found.</p>';
+             return;
+         }
+         gridElement.innerHTML = products.map(p => {
+              const offer = findOfferForProduct(p.id);
+              let price = p.price;
+              let originalPrice = null;
+              let offerBadgeHTML = '';
+              if (offer) {
+                  if (offer.specialPrice) price = offer.specialPrice;
+                  else if (offer.percentage) price = p.price * (1 - offer.percentage / 100);
+                  originalPrice = p.price;
+                  let offerText = offer.percentage ? `${offer.percentage}% OFF` : 'Offer';
+                  offerBadgeHTML = `<span class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-md uppercase z-10">${offerText}</span>`;
+              }
+              return `
+                  <div class="product-card bg-white rounded-lg shadow overflow-hidden transform transition duration-300 hover:shadow-lg border">
+                      <a href="product.html?id=${p.id}" class="block relative">
+                          ${offerBadgeHTML}
+                          <img src="${p.imageUrl || 'https://placehold.co/300x300?text=No+Image'}" alt="${p.name}" class="w-full h-40 object-contain mix-blend-multiply p-2" loading="lazy">
+                          <div class="p-3">
+                              <h4 class="text-xs font-semibold text-gray-700 truncate h-8">${p.name}</h4>
+                              <p class="text-sm main-accent-color font-bold mt-1">Rs. ${price.toLocaleString()}</p>
+                              ${originalPrice && originalPrice > price ? `<p class="text-xs text-gray-400 line-through">Rs. ${originalPrice.toLocaleString()}</p>` : ''}
+                          </div>
+                      </a>
+                  </div>`;
+          }).join('');
+    };
+    
+    const loadRelatedProducts = async (categories, excludeIds) => {
+        if (!relatedProductsSection || !relatedProductsGrid) { return; }
+        if (categories.length === 0) {
+            if(relatedProductsSection) relatedProductsSection.classList.add('hidden');
+            return;
+        }
+
+        relatedProductsGrid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-5">Loading related products...</p>';
+        relatedProductsSection.classList.remove('hidden');
+        
+        let relatedProducts = [];
+        const maxProducts = 6;
+        const maxIdsToFilter = 20; // Limit how many IDs we filter in JS
+
+        try {
+            const categoriesToQuery = categories.slice(0, 10);
+            const q = query(
+                productsCol, 
+                where("category", "in", categoriesToQuery),
+                limit(maxProducts + maxIdsToFilter)
+            );
+            
+            const snapshot = await getDocs(q);
+            snapshot.forEach(doc => {
+                if (relatedProducts.length < maxProducts && 
+                    !excludeIds.includes(doc.id) && 
+                    !relatedProducts.some(p => p.id === doc.id)) 
+                {
+                    relatedProducts.push({ id: doc.id, ...doc.data() });
+                }
+            });
+
+             if (relatedProducts.length < maxProducts) {
+                 const extraLimit = (maxProducts - relatedProducts.length) + maxIdsToFilter;
+                 const extraQuery = query(productsCol, limit(extraLimit)); 
+                 const extraSnapshot = await getDocs(extraQuery);
+                 extraSnapshot.forEach(doc => {
+                      if (relatedProducts.length < maxProducts && !excludeIds.includes(doc.id) && !relatedProducts.some(p => p.id === doc.id)) {
+                           relatedProducts.push({ id: doc.id, ...doc.data() });
+                      }
+                 });
+             }
+            renderRelatedProducts(relatedProducts.slice(0, maxProducts), 'related-products-grid');
+        } catch (error) {
+             console.error("Error loading related products:", error);
+             relatedProductsGrid.innerHTML = '<p class="text-red-500 col-span-full text-center py-5">Could not load related products.</p>';
+        }
+    };
+
+    onSnapshot(query(offersCol, orderBy("createdAt", "desc")), (snapshot) => {
+        allActiveOffers.clear();
+        snapshot.forEach(doc => {
+            allActiveOffers.set(doc.id, { id: doc.id, ...doc.data() });
+        });
+    }, error => console.error("Error fetching all offers:", error));
+
+
+    const renderCategoryNavForSearch = (categories) => { if(searchCategoryDropdown) { let dropdownHTML = `<option value="all">ALL CATEGORIES</option>`; dropdownHTML += categories.map(cat => `<option value="${cat.name}">${cat.name.toUpperCase()}</option>`).join(''); searchCategoryDropdown.innerHTML = dropdownHTML; } };
+    onSnapshot(query(categoriesCol, orderBy("name")), (snapshot) => { categoriesCache = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name })); renderCategoryNavForSearch(categoriesCache); }, error => console.error("Error fetching categories:", error));
+
+    document.addEventListener('click', async (e) => {
+       if (e.target.closest('#search-icon-btn')) {
+            const searchTerm = searchBar.value.trim();
+            const selectedCategory = searchCategoryDropdown.value;
+            let url = 'index.html?';
+            if (searchTerm) url += `search=${encodeURIComponent(searchTerm)}`;
+            if (selectedCategory !== 'all') url += `${searchTerm ? '&' : ''}category=${encodeURIComponent(selectedCategory)}`;
+            if (url !== 'index.html?') { window.location.href = url; }
+       }
+    });
+     if (searchBar) { searchBar.addEventListener('keypress', (e) => { if (e.key === 'Enter') { const searchTerm = searchBar.value.trim(); const selectedCategory = searchCategoryDropdown.value; let url = 'index.html?'; if (searchTerm) url += `search=${encodeURIComponent(searchTerm)}`; if (selectedCategory !== 'all') url += `${searchTerm ? '&' : ''}category=${encodeURIComponent(selectedCategory)}`; if (url !== 'index.html?') { window.location.href = url; } } }); }
+     if (searchCategoryDropdown) { searchCategoryDropdown.addEventListener('change', () => { const searchTerm = searchBar.value.trim(); const selectedCategory = searchCategoryDropdown.value; let url = 'index.html?'; if (searchTerm) url += `search=${encodeURIComponent(searchTerm)}`; if (selectedCategory !== 'all') url += `${searchTerm ? '&' : ''}category=${encodeURIComponent(selectedCategory)}`; if (url !== 'index.html?') { window.location.href = url; } else if (!searchTerm && selectedCategory === 'all') { window.location.href = 'index.html'; } }); }
+    if (logoBtn) { logoBtn.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'index.html'; }); }
+
+    updateCartCountBadge();
+    renderCartModal();
+
+</script>
+
+</body>
+</html>
