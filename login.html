@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Lanka Mobile Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <div class="w-full max-w-md">
+        <div class="bg-white shadow-xl rounded-2xl p-8 space-y-6">
+            <div class="text-center">
+                <h1 class="text-3xl font-bold text-gray-900">Admin Login</h1>
+                <p class="text-gray-500 mt-2">Welcome back! Please sign in.</p>
+            </div>
+
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                    <input type="email" id="email" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" required class="mt-1 block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <button type="submit" id="login-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Sign In
+                    </button>
+                </div>
+            </form>
+             <p id="error-message" class="text-center text-sm text-red-600"></p>
+        </div>
+        <p class="text-center text-sm text-gray-500 mt-6">
+            &copy; 2025 Lanka Mobile Hub. All Rights Reserved.
+        </p>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAtvnbedBpCiRe_ZyfoB-TacrboEMgft5Y", authDomain: "mobile-shop-1c315.firebaseapp.com", projectId: "mobile-shop-1c315", storageBucket: "mobile-shop-1c315.firebasestorage.app", messagingSenderId: "689278786227", appId: "1:689278786227:web:ee06565e4a230381bf6ec6", measurementId: "G-MLDEWBBEMV"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const loginForm = document.getElementById('login-form');
+        const loginBtn = document.getElementById('login-btn');
+        const errorMessage = document.getElementById('error-message');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            loginBtn.textContent = 'Signing In...';
+            loginBtn.disabled = true;
+            errorMessage.textContent = '';
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    window.location.href = 'admin.html';
+                })
+                .catch((error) => {
+                    errorMessage.textContent = 'Invalid email or password. Please try again.';
+                    loginBtn.textContent = 'Sign In';
+                    loginBtn.disabled = false;
+                });
+        });
+    </script>
+</body>
+</html>
