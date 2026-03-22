@@ -100,6 +100,10 @@
                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2h2"></path></svg>
                            Categories
                         </a>
+                        <a href="#" class="sidebar-link flex items-center py-2.5 px-4 rounded-lg hover:bg-slate-700" data-view="settings">
+                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            Settings
+                        </a>
                  </div>
             </nav>
             <div class="p-4 mt-auto border-t border-slate-700">
@@ -255,6 +259,78 @@
                      <ul id="category-list" class="space-y-3"></ul>
                  </div>
             </div>
+
+            <!-- ===== SETTINGS VIEW ===== -->
+            <div id="settings-view" class="view-content hidden">
+                <h1 class="text-3xl font-bold text-slate-100 mb-2">Settings</h1>
+                <p class="text-slate-400 mb-8">Manage your admin panel configuration.</p>
+
+                <!-- imgBB API Key Card -->
+                <div class="bg-slate-800 p-8 rounded-xl shadow-lg max-w-2xl">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-white">imgBB API Key</h2>
+                            <p class="text-sm text-slate-400">Product, category, and banner images upload කරන්න use වෙනවා</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Current API Key</label>
+                            <div class="flex gap-2">
+                                <input type="password" id="imgbb-key-display" readonly
+                                    class="flex-1 bg-slate-700 border border-slate-600 text-slate-300 rounded-lg px-4 py-2.5 text-sm font-mono"
+                                    placeholder="Loading...">
+                                <button type="button" id="toggle-key-visibility"
+                                    class="px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-300 hover:text-white hover:bg-slate-600 transition-colors" title="Show/Hide">
+                                    <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 border-t border-slate-700">
+                            <label class="block text-sm font-medium text-slate-300 mb-2">New API Key දාන්න</label>
+                            <input type="text" id="imgbb-new-key" placeholder="imgBB API key eka paste කරන්න..."
+                                class="w-full bg-slate-700 border border-slate-600 text-white rounded-lg px-4 py-2.5 text-sm font-mono placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
+                            <p class="text-xs text-slate-500 mt-2">
+                                🔗 New API key එකක් ගන්න: 
+                                <a href="https://imgbb.com/login" target="_blank" class="text-amber-400 hover:text-amber-300 underline">imgbb.com</a> 
+                                → Login → API → Add API key
+                            </p>
+                        </div>
+
+                        <div class="flex items-center gap-3 pt-2">
+                            <button type="button" id="save-imgbb-key-btn"
+                                class="px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold rounded-lg transition-colors text-sm">
+                                Save Key
+                            </button>
+                            <button type="button" id="test-imgbb-key-btn"
+                                class="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-colors text-sm border border-slate-600">
+                                Test Key
+                            </button>
+                            <p id="settings-msg" class="text-sm font-medium"></p>
+                        </div>
+                    </div>
+
+                    <!-- How to get key instructions -->
+                    <div class="mt-6 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+                        <h3 class="text-sm font-semibold text-slate-300 mb-3 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            imgBB API Key ගන්නේ කොහොමද?
+                        </h3>
+                        <ol class="text-xs text-slate-400 space-y-1.5 list-decimal list-inside">
+                            <li><a href="https://imgbb.com" target="_blank" class="text-amber-400 hover:underline">imgbb.com</a> වෙත ගිහින් account create කරන්න (free)</li>
+                            <li>Login වෙලා top menu ↗ "About" → "API" click කරන්න</li>
+                            <li>"Get API key" button ek click කරන්න</li>
+                            <li>API key eka copy කරලා above input ek ට paste කරන්න</li>
+                            <li>"Save Key" click කරන්න — ඔයාගේ imgBB key eka Firestore ට save වෙනවා</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
             </main>
     </div>
 
@@ -280,7 +356,29 @@
                     <div id="dynamic-specs-container" class="space-y-3 pt-4 border-t border-slate-700 hidden">
                         <h3 class="text-lg font-semibold text-white mb-1">Specifications</h3>
                     </div>
-                    <input type="file" id="image" accept="image/*" class="block w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200">
+                    <!-- Product Image Upload Zone -->
+                    <div id="image-upload-zone" class="relative border-2 border-dashed border-slate-600 rounded-xl p-4 text-center cursor-pointer transition-all duration-200 hover:border-amber-400 hover:bg-slate-700/40" onclick="document.getElementById('image').click()">
+                        <input type="file" id="image" accept="image/*" class="hidden">
+                        <!-- Default state -->
+                        <div id="image-upload-placeholder">
+                            <div class="flex flex-col items-center gap-2 py-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <p class="text-sm text-slate-400 font-medium">Click or drag & drop to upload image</p>
+                                <p class="text-xs text-slate-500">PNG, JPG, WEBP supported</p>
+                            </div>
+                        </div>
+                        <!-- Preview state -->
+                        <div id="image-preview-container" class="hidden relative">
+                            <img id="product-image-preview" src="" alt="Product Preview" class="w-full max-h-52 object-contain rounded-lg mx-auto">
+                            <div class="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-40 rounded-lg flex items-center justify-center transition-all duration-200 group">
+                                <span class="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">Click to change image</span>
+                            </div>
+                            <button type="button" id="remove-image-btn" class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold shadow-lg z-10 transition-colors" onclick="event.stopPropagation(); removeProductImage();">&times;</button>
+                            <p id="image-file-name" class="text-xs text-slate-400 mt-2 truncate"></p>
+                        </div>
+                    </div>
                     <div class="text-right space-x-2 pt-4">
                        <button type="button" id="cancel-edit-btn" class="cancel-btn hidden">Cancel</button>
                        <button type="submit" id="submit-btn" class="form-action-btn">Add Product</button>
@@ -351,7 +449,7 @@
         const firebaseConfig = {
          apiKey: "AIzaSyAtvnbedBpCiRe_ZyfoB-TacrboEMgft5Y", authDomain: "mobile-shop-1c315.firebaseapp.com", projectId: "mobile-shop-1c315", storageBucket: "mobile-shop-1c315.firebasestorage.app", messagingSenderId: "689278786227", appId: "1:689278786227:web:ee06565e4a230381bf6ec6", measurementId: "G-MLDEWBBEMV"
          };
-        const imgbbApiKey = "d4fe850d2ff4d9588fd827d501383ed5";
+        let imgbbApiKey = "d4fe850d2ff4d9588fd827d501383ed5"; // default, overridden from Firestore
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -750,6 +848,51 @@
         const cancelBtn = document.getElementById('cancel-edit-btn');
         const formMsg = document.getElementById('form-message');
         const imageInput = document.getElementById('image');
+        const imageUploadZone = document.getElementById('image-upload-zone');
+        const imageUploadPlaceholder = document.getElementById('image-upload-placeholder');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const productImagePreview = document.getElementById('product-image-preview');
+        const imageFileNameEl = document.getElementById('image-file-name');
+
+        imageInput.addEventListener('change', () => {
+            const file = imageInput.files[0];
+            if (file) showProductImagePreview(file);
+        });
+        imageUploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            imageUploadZone.classList.add('border-amber-400', 'bg-slate-700/40');
+        });
+        imageUploadZone.addEventListener('dragleave', () => {
+            imageUploadZone.classList.remove('border-amber-400', 'bg-slate-700/40');
+        });
+        imageUploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imageUploadZone.classList.remove('border-amber-400', 'bg-slate-700/40');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                imageInput.files = dt.files;
+                showProductImagePreview(file);
+            }
+        });
+        function showProductImagePreview(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                productImagePreview.src = e.target.result;
+                imageFileNameEl.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                imageUploadPlaceholder.classList.add('hidden');
+                imagePreviewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+        window.removeProductImage = function() {
+            imageInput.value = '';
+            productImagePreview.src = '';
+            imageFileNameEl.textContent = '';
+            imagePreviewContainer.classList.add('hidden');
+            imageUploadPlaceholder.classList.remove('hidden');
+        };
         const productListBody = document.getElementById('product-list-body');
         const modalTitle = document.getElementById('modal-title');
         const productCategoryDropdown = document.getElementById('category');
@@ -827,6 +970,8 @@
             formMsg.className = 'text-sm font-medium text-center pt-2';
             submitBtn.disabled = false;
             productModal.classList.add('hidden');
+            // Reset image preview
+            window.removeProductImage();
         }
         
         showAddModalBtn.addEventListener('click', () => {
@@ -1010,6 +1155,14 @@
                         resetProductForm();
                         currentEditingProductId = id;
                         currentEditingImageUrl = product.imageUrl;
+
+                        // Show existing image in preview
+                        if (product.imageUrl) {
+                            productImagePreview.src = product.imageUrl;
+                            imageFileNameEl.textContent = 'Current image (upload new to replace)';
+                            imageUploadPlaceholder.classList.add('hidden');
+                            imagePreviewContainer.classList.remove('hidden');
+                        }
 
                         document.getElementById('name').value = product.name;
                         document.getElementById('price').value = product.price;
@@ -1535,6 +1688,109 @@
                     console.error('Logout Error', error);
                     alert('Failed to log out.');
                 });
+            });
+        }
+
+
+        // ===== SETTINGS - imgBB API Key Management =====
+        const settingsDocRef = doc(db, 'settings', 'config');
+
+        async function loadImgbbKey() {
+            try {
+                const snap = await getDoc(settingsDocRef);
+                if (snap.exists() && snap.data().imgbbApiKey) {
+                    imgbbApiKey = snap.data().imgbbApiKey;
+                }
+            } catch(e) {
+                console.log('Settings load error:', e);
+            }
+            const display = document.getElementById('imgbb-key-display');
+            if (display) display.value = imgbbApiKey;
+        }
+        loadImgbbKey();
+
+        const saveImgbbKeyBtn = document.getElementById('save-imgbb-key-btn');
+        const testImgbbKeyBtn = document.getElementById('test-imgbb-key-btn');
+        const settingsMsg = document.getElementById('settings-msg');
+        const imgbbNewKeyInput = document.getElementById('imgbb-new-key');
+        const imgbbKeyDisplay = document.getElementById('imgbb-key-display');
+        const toggleKeyBtn = document.getElementById('toggle-key-visibility');
+
+        if (toggleKeyBtn) {
+            toggleKeyBtn.addEventListener('click', () => {
+                if (imgbbKeyDisplay.type === 'password') {
+                    imgbbKeyDisplay.type = 'text';
+                    toggleKeyBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>';
+                } else {
+                    imgbbKeyDisplay.type = 'password';
+                    toggleKeyBtn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>';
+                }
+            });
+        }
+
+        if (saveImgbbKeyBtn) {
+            saveImgbbKeyBtn.addEventListener('click', async () => {
+                const newKey = imgbbNewKeyInput.value.trim();
+                if (!newKey) {
+                    settingsMsg.textContent = 'Key eka type කරන්න!';
+                    settingsMsg.className = 'text-red-400 text-sm font-medium';
+                    return;
+                }
+                saveImgbbKeyBtn.disabled = true;
+                saveImgbbKeyBtn.textContent = 'Saving...';
+                settingsMsg.textContent = '';
+                try {
+                    await updateDoc(settingsDocRef, { imgbbApiKey: newKey }).catch(async () => {
+                        await addDoc(collection(db, 'settings'), { imgbbApiKey: newKey });
+                    });
+                    // Use setDoc to upsert
+                    const { setDoc } = await import("https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js");
+                    await setDoc(settingsDocRef, { imgbbApiKey: newKey }, { merge: true });
+                    imgbbApiKey = newKey;
+                    imgbbKeyDisplay.value = newKey;
+                    imgbbNewKeyInput.value = '';
+                    settingsMsg.textContent = '✓ API Key saved successfully!';
+                    settingsMsg.className = 'text-green-400 text-sm font-medium';
+                } catch(e) {
+                    settingsMsg.textContent = 'Save failed: ' + e.message;
+                    settingsMsg.className = 'text-red-400 text-sm font-medium';
+                } finally {
+                    saveImgbbKeyBtn.disabled = false;
+                    saveImgbbKeyBtn.textContent = 'Save Key';
+                    setTimeout(() => { settingsMsg.textContent = ''; }, 4000);
+                }
+            });
+        }
+
+        if (testImgbbKeyBtn) {
+            testImgbbKeyBtn.addEventListener('click', async () => {
+                const keyToTest = imgbbNewKeyInput.value.trim() || imgbbApiKey;
+                testImgbbKeyBtn.disabled = true;
+                testImgbbKeyBtn.textContent = 'Testing...';
+                settingsMsg.textContent = '';
+                try {
+                    // Create a tiny 1x1 pixel PNG as test image
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 1; canvas.height = 1;
+                    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+                    const formData = new FormData();
+                    formData.append('image', blob, 'test.png');
+                    const res = await fetch(`https://api.imgbb.com/1/upload?key=${keyToTest}`, { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.success) {
+                        settingsMsg.textContent = '✓ API Key valid! Upload works correctly.';
+                        settingsMsg.className = 'text-green-400 text-sm font-medium';
+                    } else {
+                        settingsMsg.textContent = '✗ Invalid Key: ' + (data.error?.message || 'Unknown error');
+                        settingsMsg.className = 'text-red-400 text-sm font-medium';
+                    }
+                } catch(e) {
+                    settingsMsg.textContent = 'Test failed: ' + e.message;
+                    settingsMsg.className = 'text-red-400 text-sm font-medium';
+                } finally {
+                    testImgbbKeyBtn.disabled = false;
+                    testImgbbKeyBtn.textContent = 'Test Key';
+                }
             });
         }
 
